@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="50dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginRight="30dp"
+        android:baselineAligned="false">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="菜名："
+            android:id="@+id/textView29"
+            android:layout_gravity="center_vertical" />
+
+        <Spinner
+            android:layout_width="186dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/spinner_dialog_name"
+            android:layout_gravity="center_vertical"
+            android:textAlignment="center" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginTop="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="单价："
+            android:id="@+id/textView30" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/editText_dialog_price"
+            android:layout_weight="3"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:inputType="numberDecimal"
+            android:textAlignment="center" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="元/斤"
+            android:id="@+id/textView31"
+            android:layout_weight="2" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="30dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="重量："
+            android:id="@+id/textView32" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/editText_dialog_weight"
+            android:layout_weight="3"
+            android:layout_marginRight="5dp"
+            android:layout_marginLeft="5dp"
+            android:inputType="numberDecimal"
+            android:textAlignment="center" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="斤"
+            android:id="@+id/textView33"
+            android:layout_weight="2" />
+    </LinearLayout>
+</LinearLayout>

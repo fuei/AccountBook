@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">记账本</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">设置</string>
+
+    <string name="outClass">外市场</string>
+    <string name="inClass">内市场</string>
+    <string name="famerClass">菜农</string>
+
+    <string name="delete_item">删除</string>
+    <string name="add_item">添加</string>
+
+    <string name="vegetableClass">详细信息：</string>
+    <string name="customer_picker">选择客户</string>
+
+</resources>
