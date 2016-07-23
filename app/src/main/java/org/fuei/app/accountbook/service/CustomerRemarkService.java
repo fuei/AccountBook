@@ -14,7 +14,7 @@ import java.util.ArrayList;
 /**
  * Created by fuei on 2016/7/17.
  */
-public class CustomerRemarkLab {
+public class CustomerRemarkService {
     public CustomerRemark findRecordByCustomerId(int customerId) {
 
         CustomerRemark customerRemark = new CustomerRemark();
@@ -96,9 +96,11 @@ public class CustomerRemarkLab {
         }
 
         ContentValues vals = new ContentValues();
+        vals.put("customer_id", customerId);
         vals.put("white_go", wFrameCount);
         vals.put("green_go", gFrameCount);
         vals.put("sum_frame", wFrameCount + gFrameCount);
+        vals.put("data_date", VariableUtils.DATADATE);
         if (id == 0) {
             // insert
             sqLiteDatabase.insert("t_customer_remark", null, vals);

@@ -16,15 +16,15 @@ import java.util.ArrayList;
 /**
  * Created by fuei on 2016/7/11.
  */
-public class   TradeRecordLab {
+public class TradeRecordService {
     private ArrayList<TradeRecord> mTradeRecords;
 
     private Context mAppContext;
     private int mCustomerId;
 
-    public TradeRecordLab(){}
+    public TradeRecordService(){}
 
-    public TradeRecordLab(Context appContext, int customerId) {
+    public TradeRecordService(Context appContext, int customerId) {
         mAppContext = appContext;
         mCustomerId = customerId;
     }
@@ -60,10 +60,18 @@ public class   TradeRecordLab {
         return mTradeRecords;
     }
 
-    public TradeRecord findRecordByVegId(int vegId) {
+    public TradeRecord findRecordByVegId(int vegId, int isNew) {
         //select
         SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openOrCreateDatabase(VariableUtils.DBFILE, null);
-        String selectSql = "SELECT t.id, t.vegetable_id, t.customer_id, t.gross_weight, t.net_weight, t.white_frame_count, t.green_frame_count, t.frame_weight, v.unit_price, t.sum_price,t.data_date, v.name FROM t_trade_record t LEFT OUTER JOIN t_vegetable v ON t.vegetable_id = v.id where t.customer_id = "+ mCustomerId +" AND t.vegetable_id = "+ vegId + " AND t.data_date = " + VariableUtils.DATADATE;
+
+        String unitPriceSql = "";
+        if (isNew == 1) {
+            unitPriceSql = "v.unit_price";
+        } else {
+            unitPriceSql = "t.unit_price";
+        }
+
+        String selectSql = "SELECT t.id, t.vegetable_id, t.customer_id, t.gross_weight, t.net_weight, t.white_frame_count, t.green_frame_count, t.frame_weight, " + unitPriceSql + ", t.sum_price,t.data_date, v.name FROM t_trade_record t LEFT OUTER JOIN t_vegetable v ON t.vegetable_id = v.id where t.customer_id = "+ mCustomerId +" AND t.vegetable_id = "+ vegId + " AND t.data_date = " + VariableUtils.DATADATE;
         Cursor cursor = sqLiteDatabase.rawQuery(selectSql, null);
 
         TradeRecord t = null;

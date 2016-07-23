@@ -46,6 +46,12 @@
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                 android:value=".TradeListActivity" />
         </activity>
+        <activity android:name=".settings.AllCustomerListActivity">
+
+        </activity>
+        <activity android:name=".settings.AllVegetableListActivity">
+
+        </activity>
     </application>
 
 

@@ -18,4 +18,10 @@
 
     <string name="date_picker_title">数据日期：</string>
 
+    <string-array name="apptype">
+        <item>@string/outClass</item>
+        <item>@string/inClass</item>
+        <item>@string/famerClass</item>
+    </string-array>
+
 </resources>

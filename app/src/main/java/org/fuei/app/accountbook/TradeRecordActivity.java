@@ -12,7 +12,7 @@ import android.view.MenuItem;
  */
 public class TradeRecordActivity extends SingleFragmentActivity {
     @Override
-    protected Fragment createFragment(int flag) {
+    protected Fragment createFragment() {
         int tradeId = (int)getIntent().getSerializableExtra(TradeRecordFragment.EXTRA_TR_ID);
         return TradeRecordFragment.newInstance(tradeId);
     }

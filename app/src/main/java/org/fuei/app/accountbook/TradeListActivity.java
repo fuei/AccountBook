@@ -8,21 +8,8 @@ import android.support.v4.app.Fragment;
 public class TradeListActivity extends SingleFragmentActivity {
 
     @Override
-    public Fragment createFragment(int flag) {
-        switch (flag) {
-            case 1:
-                int customId = (int)getIntent().getSerializableExtra(TradeListFragment.EXTRA_CUSTOMER_ID);
-                return TradeListFragment.newInstance(customId);
-            case 2:
-
-                break;
-            case 3:
-
-                break;
-            case 4:
-
-                break;
-        }
-        return null;
+    public Fragment createFragment() {
+        int customId = (int)getIntent().getSerializableExtra(TradeListFragment.EXTRA_CUSTOMER_ID);
+        return TradeListFragment.newInstance(customId);
     }
 }

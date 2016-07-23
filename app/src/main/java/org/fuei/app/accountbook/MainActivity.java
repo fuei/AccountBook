@@ -1,5 +1,7 @@
 package org.fuei.app.accountbook;
 
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -8,12 +10,17 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
+import org.fuei.app.accountbook.settings.AllCustomerListActivity;
+import org.fuei.app.accountbook.settings.AllVegetableListActivity;
 import org.fuei.app.accountbook.util.VariableUtils;
 
 import java.text.ParseException;
@@ -130,11 +137,24 @@ public class MainActivity extends AppCompatActivity
                 }
                 break;
             case R.id.customer_manage:
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("客户类型")
+                        .setItems(R.array.apptype, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+//                                Toast.makeText(getApplicationContext(), which+"", Toast.LENGTH_LONG).show();
+                                VariableUtils.APPTYPE = which + 1;
+                                Intent i = new Intent(getApplicationContext(), AllCustomerListActivity.class);
+                                startActivity(i);
+                            }
+                        });
 
+                AlertDialog ad = builder.create();
+                ad.show();
 
                 break;
             case R.id.vegetable_manage:
-
+                Intent i = new Intent(getApplicationContext(), AllVegetableListActivity.class);
+                startActivity(i);
 
                 break;
         }

@@ -4,8 +4,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import org.fuei.app.accountbook.MainActivity;
-import org.fuei.app.accountbook.po.Customer;
 import org.fuei.app.accountbook.po.TradeRecord;
 import org.fuei.app.accountbook.po.Vegetable;
 import org.fuei.app.accountbook.util.VariableUtils;
@@ -15,13 +13,13 @@ import java.util.ArrayList;
 /**
  * Created by fuei on 2016/7/16.
  */
-public class VegetableLab {
+public class VegetableService {
     private ArrayList<Vegetable> mVegetables;
 
-    private static VegetableLab sVegetableLab;
+    private static VegetableService sVegetableService;
     private Context mAppContext;
 
-    private VegetableLab(Context appContext) {
+    private VegetableService(Context appContext) {
         mAppContext = appContext;
         mVegetables = new ArrayList<Vegetable>();
 
@@ -31,7 +29,7 @@ public class VegetableLab {
         Cursor cursor = sqLiteDatabase.rawQuery(selectSql, null);
 
         ArrayList<TradeRecord> tradeRecords;
-        tradeRecords = new TradeRecordLab().findTradeRecords(VariableUtils.CUSTOMERID);
+        tradeRecords = new TradeRecordService().findTradeRecords(VariableUtils.CUSTOMERID);
         while (cursor.moveToNext()) {
             int id = cursor.getInt(cursor.getColumnIndex("id"));
 
@@ -53,11 +51,11 @@ public class VegetableLab {
         sqLiteDatabase.close();
     }
 
-    public static VegetableLab get(Context c) {
-//        if (sVegetableLab == null) {
-            sVegetableLab = new VegetableLab(c.getApplicationContext());
+    public static VegetableService get(Context c) {
+//        if (sVegetableService == null) {
+            sVegetableService = new VegetableService(c.getApplicationContext());
 //        }
-        return sVegetableLab;
+        return sVegetableService;
     }
 
     public ArrayList<Vegetable> getVegetables() {

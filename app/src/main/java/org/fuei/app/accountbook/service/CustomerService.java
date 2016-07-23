@@ -4,7 +4,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import org.fuei.app.accountbook.MainActivity;
 import org.fuei.app.accountbook.po.Customer;
 import org.fuei.app.accountbook.util.VariableUtils;
 
@@ -13,13 +12,13 @@ import java.util.ArrayList;
 /**
  * Created by fuei on 2016/5/23.
  */
-public class CustomerLab {
+public class CustomerService {
     private ArrayList<Customer> mCustomers;
 
-    private static CustomerLab sCustomerLab;
+    private static CustomerService sCustomerService;
     private Context mAppContext;
 
-    private CustomerLab(Context appContext) {
+    private CustomerService(Context appContext) {
         mAppContext = appContext;
         mCustomers = new ArrayList<Customer>();
 
@@ -29,7 +28,7 @@ public class CustomerLab {
         Cursor cursor = sqLiteDatabase.rawQuery(selectSql, null);
 
         ArrayList<Customer> tradeCustomers;
-        tradeCustomers = new TradeRecordLab().findTradeCustomers(VariableUtils.APPTYPE);
+        tradeCustomers = new TradeRecordService().findTradeCustomers(VariableUtils.APPTYPE);
 
         while (cursor.moveToNext()) {
             int id = cursor.getInt(cursor.getColumnIndex("id"));
@@ -52,11 +51,11 @@ public class CustomerLab {
         sqLiteDatabase.close();
     }
 
-    public static CustomerLab get(Context c) {
-//        if (sCustomerLab == null) {
-            sCustomerLab = new CustomerLab(c.getApplicationContext());
+    public static CustomerService get(Context c) {
+//        if (sCustomerService == null) {
+            sCustomerService = new CustomerService(c.getApplicationContext());
 //        }
-        return sCustomerLab;
+        return sCustomerService;
     }
 
     public ArrayList<Customer> getCustomers() {

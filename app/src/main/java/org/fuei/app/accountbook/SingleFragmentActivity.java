@@ -16,7 +16,7 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
  * Created by fuei on 2016/6/1.
  */
 public abstract class SingleFragmentActivity extends AppCompatActivity {
-    protected abstract Fragment createFragment(int flag);
+    protected abstract Fragment createFragment();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -33,7 +33,7 @@ public abstract class SingleFragmentActivity extends AppCompatActivity {
         FragmentManager fm = getSupportFragmentManager();
         Fragment fragment = fm.findFragmentById(R.id.fragmentContainer);
         if (fragment == null) {
-            fragment = createFragment(1);
+            fragment = createFragment();
             fm.beginTransaction()
                     .add(R.id.fragmentContainer, fragment)
                     .commit();

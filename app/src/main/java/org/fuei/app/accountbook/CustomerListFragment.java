@@ -29,8 +29,8 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.fuei.app.accountbook.po.Customer;
 import org.fuei.app.accountbook.po.CustomerRemark;
 import org.fuei.app.accountbook.po.TradeRecord;
-import org.fuei.app.accountbook.service.CustomerRemarkLab;
-import org.fuei.app.accountbook.service.TradeRecordLab;
+import org.fuei.app.accountbook.service.CustomerRemarkService;
+import org.fuei.app.accountbook.service.TradeRecordService;
 import org.fuei.app.accountbook.util.VariableUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -61,7 +61,7 @@ public class CustomerListFragment extends ListFragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        mCustomers = new TradeRecordLab().findTradeCustomers(VariableUtils.APPTYPE);
+        mCustomers = new TradeRecordService().findTradeCustomers(VariableUtils.APPTYPE);
 
         CustomerAdapter adapter = new CustomerAdapter(mCustomers);
         setListAdapter(adapter);
@@ -113,7 +113,7 @@ public class CustomerListFragment extends ListFragment {
                                 for (int i = adapter.getCount() - 1; i >= 0; i--) {
                                     if (getListView().isItemChecked(i)) {
                                         Customer c = adapter.getItem(i);
-                                        int success = new TradeRecordLab().deleteRecordByCustomerId(c.getId());
+                                        int success = new TradeRecordService().deleteRecordByCustomerId(c.getId());
                                         if (success == 1) {
                                             mCustomers.remove(c);
                                             adapter.remove(c);
@@ -144,7 +144,7 @@ public class CustomerListFragment extends ListFragment {
     @Override
     public void onResume() {
         super.onResume();
-        mCustomers = new TradeRecordLab(getActivity(), 0).findTradeCustomers(VariableUtils.APPTYPE);
+        mCustomers = new TradeRecordService(getActivity(), 0).findTradeCustomers(VariableUtils.APPTYPE);
 
         CustomerAdapter adapter = new CustomerAdapter(mCustomers);
         setListAdapter(adapter);
@@ -184,7 +184,7 @@ public class CustomerListFragment extends ListFragment {
         } else if (id == R.id.export) {
 
             //获取某个市场类型的客户列表，根据客户循环导出excel
-            ArrayList<Customer> customers = new TradeRecordLab().findTradeCustomers(VariableUtils.APPTYPE);
+            ArrayList<Customer> customers = new TradeRecordService().findTradeCustomers(VariableUtils.APPTYPE);
             for (Customer customer: customers) {
                 data2Excel(customer);
             }
@@ -272,7 +272,7 @@ public class CustomerListFragment extends ListFragment {
         customerNameCell.setCellValue(customer.getName());
         dataDateCell.setCellValue(dateStr);
 
-        CustomerRemark customerRemark = new CustomerRemarkLab().findRecordByCustomerId(customer.getId());
+        CustomerRemark customerRemark = new CustomerRemarkService().findRecordByCustomerId(customer.getId());
         whiteGoRow.getCell(VariableUtils.SheetColumnIndexs.FRAMECOUNT.getIndex())
                 .setCellValue(customerRemark.getWhiteGo());
         if (customerRemark.getWhiteGo() != 0) {
@@ -332,7 +332,7 @@ public class CustomerListFragment extends ListFragment {
         }
 
         //菜列表
-        ArrayList<TradeRecord> tradeRecords = new TradeRecordLab().findTradeRecords(customer.getId());
+        ArrayList<TradeRecord> tradeRecords = new TradeRecordService().findTradeRecords(customer.getId());
         int tradeRecordRowNum = 3;
         for (TradeRecord tradeRecord: tradeRecords) {
             HSSFRow tradeRow = sheet.getRow(tradeRecordRowNum);

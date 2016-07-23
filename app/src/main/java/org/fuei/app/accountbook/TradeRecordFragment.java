@@ -16,7 +16,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import org.fuei.app.accountbook.po.TradeRecord;
-import org.fuei.app.accountbook.service.TradeRecordLab;
+import org.fuei.app.accountbook.service.TradeRecordService;
 import org.fuei.app.accountbook.util.VariableUtils;
 
 /**
@@ -52,11 +52,11 @@ public class TradeRecordFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         int vegetableId = (int)getArguments().getSerializable(EXTRA_TR_ID);
-        TradeRecordLab recordLab = new TradeRecordLab(getActivity(), TradeListFragment.sCustomerId);
-        mTradeRecord = recordLab.findRecordByVegId(vegetableId);
+        TradeRecordService recordLab = new TradeRecordService(getActivity(), TradeListFragment.sCustomerId);
+        mTradeRecord = recordLab.findRecordByVegId(vegetableId, 0);
         if (mTradeRecord == null) {
             recordLab.insertRecord(vegetableId);
-            mTradeRecord = new TradeRecordLab(getActivity(), TradeListFragment.sCustomerId).findRecordByVegId(vegetableId);
+            mTradeRecord = new TradeRecordService(getActivity(), TradeListFragment.sCustomerId).findRecordByVegId(vegetableId, 1);
 
         }
 
@@ -93,7 +93,7 @@ public class TradeRecordFragment extends Fragment {
             mGFrameCountTxt.setText(mTradeRecord.getGreenFrameCount()+"");
             mFrameWeightTxt.setText(mTradeRecord.getFrameWeight()+"");
             mNetWeightTxt.setText(mTradeRecord.getNetWeight()+"");
-            mSumPriceTxt.setText(mTradeRecord.getSumPrice()+"");
+            mSumPriceTxt.setText(VariableUtils.SaveOneNum(mTradeRecord.getSumPrice()));
         }
 
         return v;
@@ -163,7 +163,7 @@ public class TradeRecordFragment extends Fragment {
                 mSumPriceTxt.setText(sumPriceAdjust);
                 mTradeRecord.setSumPrice(sumPrice);
 
-                new TradeRecordLab().updateRecord(mTradeRecord);
+                new TradeRecordService().updateRecord(mTradeRecord);
 
                 getActivity().finish();
                 return true;

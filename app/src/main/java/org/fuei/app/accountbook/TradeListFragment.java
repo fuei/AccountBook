@@ -28,9 +28,9 @@ import android.widget.TextView;
 
 import org.fuei.app.accountbook.po.Customer;
 import org.fuei.app.accountbook.po.TradeRecord;
-import org.fuei.app.accountbook.service.CustomerLab;
-import org.fuei.app.accountbook.service.CustomerRemarkLab;
-import org.fuei.app.accountbook.service.TradeRecordLab;
+import org.fuei.app.accountbook.service.CustomerService;
+import org.fuei.app.accountbook.service.CustomerRemarkService;
+import org.fuei.app.accountbook.service.TradeRecordService;
 import org.fuei.app.accountbook.util.VariableUtils;
 
 import java.util.ArrayList;
@@ -69,7 +69,7 @@ public class TradeListFragment extends ListFragment {
         VariableUtils.CUSTOMERID = customId;
         Log.d(TAG, "customId: " + customId);
 
-        mTradeRecords = new TradeRecordLab(getActivity(), customId).findTradeRecords(customId);
+        mTradeRecords = new TradeRecordService(getActivity(), customId).findTradeRecords(customId);
         Log.d("ReacordCount: ", mTradeRecords.size()+"");
 
         TradeRecordAdapter adapter = new TradeRecordAdapter(mTradeRecords);
@@ -79,7 +79,7 @@ public class TradeListFragment extends ListFragment {
     @Override
     public void onResume() {
         super.onResume();
-        mTradeRecords = new TradeRecordLab(getActivity(), VariableUtils.CUSTOMERID).findTradeRecords(VariableUtils.CUSTOMERID);
+        mTradeRecords = new TradeRecordService(getActivity(), VariableUtils.CUSTOMERID).findTradeRecords(VariableUtils.CUSTOMERID);
         Log.d("ReacordCount: ", mTradeRecords.size()+"");
 
         TradeRecordAdapter adapter = new TradeRecordAdapter(mTradeRecords);
@@ -87,7 +87,7 @@ public class TradeListFragment extends ListFragment {
         ((TradeRecordAdapter)getListAdapter()).notifyDataSetChanged();
 
         //汇总客户的筐数
-        new CustomerRemarkLab().insertOrUpdateFrameCount(VariableUtils.CUSTOMERID);
+        new CustomerRemarkService().insertOrUpdateFrameCount(VariableUtils.CUSTOMERID);
 
     }
 
@@ -100,13 +100,13 @@ public class TradeListFragment extends ListFragment {
         final int customId = (int)getArguments().getSerializable(TradeListFragment.EXTRA_CUSTOMER_ID);
         Log.d(TAG, "customId: " + customId);
 
-        Customer customer = CustomerLab.get(getActivity()).getCustomer(customId);
+        Customer customer = CustomerService.get(getActivity()).getCustomer(customId);
 
         if (customer != null) {
             actionBar.setTitle(customer.getName());
         } else {
             ArrayList<Customer> tradeCustomers;
-            tradeCustomers = new TradeRecordLab().findTradeCustomers(VariableUtils.APPTYPE);
+            tradeCustomers = new TradeRecordService().findTradeCustomers(VariableUtils.APPTYPE);
             for (Customer c : tradeCustomers) {
                 if (c.getId() == customId) {
                     actionBar.setTitle(c.getName());
@@ -162,14 +162,14 @@ public class TradeListFragment extends ListFragment {
                     switch (item.getItemId()) {
                         case R.id.menu_item_delete:
                             TradeRecordAdapter adapter = (TradeRecordAdapter)getListAdapter();
-                            TradeRecordLab tradeRecordLab = new TradeRecordLab(getActivity(), customId);
+                            TradeRecordService tradeRecordService = new TradeRecordService(getActivity(), customId);
                             for (int i = adapter.getCount() - 1; i >= 0; i--) {
                                 if (getListView().isItemChecked(i)) {
-                                    tradeRecordLab.findTradeRecords(customId);
+                                    tradeRecordService.findTradeRecords(customId);
                                     TradeRecord t = adapter.getItem(i);
-                                    int success = tradeRecordLab.deleteRecord(t.getId());
+                                    int success = tradeRecordService.deleteRecord(t.getId());
                                     if (success == 1) {
-                                        tradeRecordLab.deleteTradeRecord(t);
+                                        tradeRecordService.deleteTradeRecord(t);
                                         adapter.remove(t);
                                     }
                                 }
@@ -208,12 +208,6 @@ public class TradeListFragment extends ListFragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_add:
-//                TradeRecord tradeRecord = new TradeRecord();
-//                TradeRecordLab.get(getActivity()).addTradeRecord(tradeRecord);
-//                Intent i = new Intent(getActivity(), TradeRecordActivity.class);
-//                i.putExtra(TradeRecordFragment.EXTRA_TR_ID, tradeRecord.getId());
-//                startActivityForResult(i, 0);
-
                 // 弹出选择客户的对话框
                 FragmentManager fm = getActivity().getSupportFragmentManager();
                 TypePickerFragment dialog = TypePickerFragment.newInstance(VariableUtils.DIALOG_TYPE.VEGETABLE.getDialogType(),VariableUtils.APP_TYPE.OUT.getAppType());
@@ -247,7 +241,7 @@ public class TradeListFragment extends ListFragment {
 
         switch (item.getItemId()) {
             case R.id.menu_item_delete:
-                TradeRecordLab t = new TradeRecordLab(getActivity(), mCustomer.getId());
+                TradeRecordService t = new TradeRecordService(getActivity(), mCustomer.getId());
                 t.findTradeRecords(mCustomer.getId());
                 t.deleteTradeRecord(tradeRecord);
                 adapter.notifyDataSetChanged();

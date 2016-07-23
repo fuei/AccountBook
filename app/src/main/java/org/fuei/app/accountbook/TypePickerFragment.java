@@ -15,8 +15,8 @@ import android.widget.RadioGroup;
 
 import org.fuei.app.accountbook.po.Customer;
 import org.fuei.app.accountbook.po.Vegetable;
-import org.fuei.app.accountbook.service.CustomerLab;
-import org.fuei.app.accountbook.service.VegetableLab;
+import org.fuei.app.accountbook.service.CustomerService;
+import org.fuei.app.accountbook.service.VegetableService;
 import org.fuei.app.accountbook.util.VariableUtils;
 
 import java.util.ArrayList;
@@ -64,7 +64,7 @@ public class TypePickerFragment extends DialogFragment {
 
         int firstFlag = 0;
         if (mDialogType == VariableUtils.DIALOG_TYPE.CUSTOMER.getDialogType()) {
-            ArrayList<Customer> customers = CustomerLab.get(getActivity()).getCustomers();
+            ArrayList<Customer> customers = CustomerService.get(getActivity()).getCustomers();
             for (Customer c: customers) {
                 RadioButton tempButton = new RadioButton(getActivity());
                 tempButton.setText(c.getName());
@@ -77,7 +77,7 @@ public class TypePickerFragment extends DialogFragment {
                 firstFlag++;
             }
         } else if (mDialogType == VariableUtils.DIALOG_TYPE.VEGETABLE.getDialogType()) {
-            ArrayList<Vegetable> vegetables = VegetableLab.get(getActivity()).getVegetables();
+            ArrayList<Vegetable> vegetables = VegetableService.get(getActivity()).getVegetables();
             for (Vegetable v: vegetables) {
                 RadioButton tempButton = new RadioButton(getActivity());
                 tempButton.setText(v.getName());

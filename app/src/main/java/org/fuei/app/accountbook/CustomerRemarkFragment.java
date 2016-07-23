@@ -23,14 +23,13 @@ import android.widget.TextView;
 
 import org.fuei.app.accountbook.po.CustomerRemark;
 import org.fuei.app.accountbook.po.TradeRecord;
-import org.fuei.app.accountbook.service.CustomerRemarkLab;
-import org.fuei.app.accountbook.service.TradeRecordLab;
+import org.fuei.app.accountbook.service.CustomerRemarkService;
+import org.fuei.app.accountbook.service.TradeRecordService;
 import org.fuei.app.accountbook.util.VariableUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
@@ -68,7 +67,7 @@ public class CustomerRemarkFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         mCustomerId = (int)getArguments().getSerializable(EXTRA_CR_ID);
-        mCustomerRemark = new CustomerRemarkLab().findRecordByCustomerId(mCustomerId);
+        mCustomerRemark = new CustomerRemarkService().findRecordByCustomerId(mCustomerId);
 
         setHasOptionsMenu(true);
     }
@@ -206,7 +205,7 @@ public class CustomerRemarkFragment extends Fragment {
                 dialog.setOnShowListener(new DialogInterface.OnShowListener() {
                     @Override
                     public void onShow(DialogInterface dialog) {
-                        final ArrayList<TradeRecord> tradeRecords = new TradeRecordLab().findVegetableList(mCustomerId, VariableUtils.DATADATE);
+                        final ArrayList<TradeRecord> tradeRecords = new TradeRecordService().findVegetableList(mCustomerId, VariableUtils.DATADATE);
                         ArrayAdapter<TradeRecord> adapter = new ArrayAdapter<TradeRecord>(getActivity(),android.R.layout.simple_spinner_item, tradeRecords);
                         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         // Apply the adapter to the spinner
@@ -255,7 +254,7 @@ public class CustomerRemarkFragment extends Fragment {
             case R.id.action_save:
                 //计算总价
                 //菜总价
-                float tradeSumPrice = new TradeRecordLab().findSumPrice(mCustomerId, VariableUtils.DATADATE);
+                float tradeSumPrice = new TradeRecordService().findSumPrice(mCustomerId, VariableUtils.DATADATE);
                 //退白筐数
                 String wFrameComeStr = mWFrameComeTxt.getText().toString();
                 if (wFrameComeStr==null || wFrameComeStr.trim().equals("")) {
@@ -292,16 +291,20 @@ public class CustomerRemarkFragment extends Fragment {
                     }
                 }
                 float owePrice = Float.parseFloat(owePriceStr);
+
                 //退菜总价
                 float vegComePrice = 0;
-                for (int i = 0; i < mVegComeList.length(); i++) {
-                    try {
-                        JSONObject jsonObject = (JSONObject) mVegComeList.get(i);
-                        vegComePrice += Float.parseFloat(jsonObject.get("sumPrice").toString());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+                if (mVegComeList != null) {
+                    for (int i = 0; i < mVegComeList.length(); i++) {
+                        try {
+                            JSONObject jsonObject = (JSONObject) mVegComeList.get(i);
+                            vegComePrice += Float.parseFloat(jsonObject.get("sumPrice").toString());
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
+
                 //总价
                 float sumPrice = tradeSumPrice + framePrice + owePrice - vegComePrice;
                 //界面显示
@@ -309,11 +312,13 @@ public class CustomerRemarkFragment extends Fragment {
                 //数据入库
                 mCustomerRemark.setWhiteCome(whiteComeNum);
                 mCustomerRemark.setGreenCome(greenComeNum);
-                mCustomerRemark.setVegetableCome(mVegComeList.toString());
+                if (mVegComeList != null) {
+                    mCustomerRemark.setVegetableCome(mVegComeList.toString());
+                }
                 mCustomerRemark.setOweMoney(owePrice);
                 mCustomerRemark.setAllMoney(sumPrice);
 
-                int flag = new CustomerRemarkLab().updateRecord(mCustomerRemark);
+                int flag = new CustomerRemarkService().updateRecord(mCustomerRemark);
 
 
             default:

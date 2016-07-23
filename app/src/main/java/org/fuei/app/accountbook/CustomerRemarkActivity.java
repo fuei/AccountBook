@@ -9,7 +9,7 @@ import android.view.MenuItem;
  */
 public class CustomerRemarkActivity extends SingleFragmentActivity {
     @Override
-    protected Fragment createFragment(int flag) {
+    protected Fragment createFragment() {
         int crId = (int)getIntent().getSerializableExtra(CustomerRemarkFragment.EXTRA_CR_ID);
         return CustomerRemarkFragment.newInstance(crId);
     }
