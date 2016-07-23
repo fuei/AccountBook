@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -123,7 +122,7 @@ public class TypePickerFragment extends DialogFragment {
             //启动该客户的交易列表Activity
             i = new Intent(getActivity(), TradeListActivity.class);
             //传参
-            i.putExtra(OutTradeListFragment.EXTRA_CUSTOMER_ID, mObjectId);
+            i.putExtra(TradeListFragment.EXTRA_CUSTOMER_ID, mObjectId);
         } else if (mDialogType == VariableUtils.DIALOG_TYPE.VEGETABLE.getDialogType()) {
             //启动该客户的交易列表Activity
             i = new Intent(getActivity(), TradeRecordActivity.class);

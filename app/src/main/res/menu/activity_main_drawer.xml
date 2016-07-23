@@ -16,12 +16,21 @@
             android:title="@string/famerClass" />
     </group>
 
-    <item android:title="设置">
+    <item android:id="@+id/settings"
+        android:title="设置">
         <menu>
+            <item android:id="@+id/date_manage"
+                android:icon="@drawable/ic_menu_share"
+                android:title="日期"
+                />
             <item
-                android:id="@+id/nav_manage"
+                android:id="@+id/customer_manage"
                 android:icon="@drawable/ic_menu_manage"
-                android:title="Tools" />
+                android:title="客户" />
+            <item
+                android:id="@+id/vegetable_manage"
+                android:icon="@drawable/ic_menu_manage"
+                android:title="商品" />
         </menu>
     </item>
 

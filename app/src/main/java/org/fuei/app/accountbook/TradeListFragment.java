@@ -5,7 +5,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.NavUtils;
@@ -39,8 +38,8 @@ import java.util.ArrayList;
 /**
  * Created by fuei on 2016/5/21.
  */
-public class OutTradeListFragment extends ListFragment {
-    public static final String TAG = "OutTradeListFragment";
+public class TradeListFragment extends ListFragment {
+    public static final String TAG = "TradeListFragment";
     public static final String EXTRA_CUSTOMER_ID = "org.fuei.app.accountbook.customer_id";
     private static final String DIALOG_VEGETABLE = "vegetableDialog";
 
@@ -51,10 +50,10 @@ public class OutTradeListFragment extends ListFragment {
     private Customer mCustomer;
     private EditText mCNameField;
 
-    public static OutTradeListFragment newInstance(int customerId) {
+    public static TradeListFragment newInstance(int customerId) {
         Bundle args = new Bundle();
         args.putSerializable(EXTRA_CUSTOMER_ID, customerId);
-        OutTradeListFragment fragment = new OutTradeListFragment();
+        TradeListFragment fragment = new TradeListFragment();
         fragment.setArguments(args);
 
         return fragment;
@@ -65,7 +64,7 @@ public class OutTradeListFragment extends ListFragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        int customId = (int)getArguments().getSerializable(OutTradeListFragment.EXTRA_CUSTOMER_ID);
+        int customId = (int)getArguments().getSerializable(TradeListFragment.EXTRA_CUSTOMER_ID);
         sCustomerId = customId;
         VariableUtils.CUSTOMERID = customId;
         Log.d(TAG, "customId: " + customId);
@@ -98,7 +97,7 @@ public class OutTradeListFragment extends ListFragment {
 
         final ActionBar actionBar = (ActionBar)((AppCompatActivity)getActivity()).getSupportActionBar();
 
-        final int customId = (int)getArguments().getSerializable(OutTradeListFragment.EXTRA_CUSTOMER_ID);
+        final int customId = (int)getArguments().getSerializable(TradeListFragment.EXTRA_CUSTOMER_ID);
         Log.d(TAG, "customId: " + customId);
 
         Customer customer = CustomerLab.get(getActivity()).getCustomer(customId);
@@ -219,7 +218,7 @@ public class OutTradeListFragment extends ListFragment {
                 FragmentManager fm = getActivity().getSupportFragmentManager();
                 TypePickerFragment dialog = TypePickerFragment.newInstance(VariableUtils.DIALOG_TYPE.VEGETABLE.getDialogType(),VariableUtils.APP_TYPE.OUT.getAppType());
 
-//            dialog.setTargetFragment(OutTradeListFragment.class, REQUEST_CUSTOMER);
+//            dialog.setTargetFragment(TradeListFragment.class, REQUEST_CUSTOMER);
                 dialog.show(fm, DIALOG_VEGETABLE);
                 return true;
             case android.R.id.home:

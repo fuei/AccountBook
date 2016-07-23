@@ -1,8 +1,6 @@
 package org.fuei.app.accountbook;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
-import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -10,22 +8,16 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import org.fuei.app.accountbook.po.TradeRecord;
 import org.fuei.app.accountbook.service.TradeRecordLab;
 import org.fuei.app.accountbook.util.VariableUtils;
-
-import java.text.DecimalFormat;
 
 /**
  * Created by fuei on 2016/5/21.
@@ -60,11 +52,11 @@ public class TradeRecordFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         int vegetableId = (int)getArguments().getSerializable(EXTRA_TR_ID);
-        TradeRecordLab recordLab = new TradeRecordLab(getActivity(), OutTradeListFragment.sCustomerId);
+        TradeRecordLab recordLab = new TradeRecordLab(getActivity(), TradeListFragment.sCustomerId);
         mTradeRecord = recordLab.findRecordByVegId(vegetableId);
         if (mTradeRecord == null) {
             recordLab.insertRecord(vegetableId);
-            mTradeRecord = new TradeRecordLab(getActivity(), OutTradeListFragment.sCustomerId).findRecordByVegId(vegetableId);
+            mTradeRecord = new TradeRecordLab(getActivity(), TradeListFragment.sCustomerId).findRecordByVegId(vegetableId);
 
         }
 

@@ -19,7 +19,7 @@ public class CustomerRemarkLab {
 
         CustomerRemark customerRemark = new CustomerRemark();
 
-        SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openOrCreateDatabase(MainActivity.DBFILE, null);
+        SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openOrCreateDatabase(VariableUtils.DBFILE, null);
 
         String sql = "SELECT * FROM t_customer_remark WHERE customer_id = " + customerId + " AND data_date = " + VariableUtils.DATADATE;
         Cursor cursor = sqLiteDatabase.rawQuery(sql, null);
@@ -44,7 +44,7 @@ public class CustomerRemarkLab {
     }
 
     public void insertRecord(CustomerRemark c) {
-        SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openOrCreateDatabase(MainActivity.DBFILE, null);
+        SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openOrCreateDatabase(VariableUtils.DBFILE, null);
 
 //        String insertSql = "insert into t_customer_remark(customer_id, white_go, white_come, green_go, green_come, vegetable_come, owe_money, all_money, sum_frame, data_date) values(?,?,?,?,?,?,?,?,?,?)";
 //
@@ -57,7 +57,7 @@ public class CustomerRemarkLab {
 
     public int updateRecord(CustomerRemark c) {
 
-        SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openOrCreateDatabase(MainActivity.DBFILE, null);
+        SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openOrCreateDatabase(VariableUtils.DBFILE, null);
 
 
         int flag = sqLiteDatabase.update("t_customer_remark", createValues(c), "id = " + c.getId(), null);
@@ -69,7 +69,7 @@ public class CustomerRemarkLab {
 
     public int deleteRecord(int customerId) {
 
-        SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openOrCreateDatabase(MainActivity.DBFILE, null);
+        SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openOrCreateDatabase(VariableUtils.DBFILE, null);
 
         ContentValues cv = new ContentValues();
         String[] args = {String.valueOf(customerId), String.valueOf(VariableUtils.DATADATE)};
@@ -81,7 +81,7 @@ public class CustomerRemarkLab {
     }
 
     public void insertOrUpdateFrameCount(int customerId) {
-        SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openOrCreateDatabase(MainActivity.DBFILE, null);
+        SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openOrCreateDatabase(VariableUtils.DBFILE, null);
         Cursor cursor = sqLiteDatabase.rawQuery("select id from t_customer_remark where customer_id = "+ customerId +" AND data_date = " + VariableUtils.DATADATE, null);
         int id = 0;
         if(cursor.moveToFirst())

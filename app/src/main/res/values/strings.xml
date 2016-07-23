@@ -7,7 +7,7 @@
     <string name="action_settings">设置</string>
 
     <string name="outClass">外市场</string>
-    <string name="inClass">内市场</string>
+    <string name="inClass">本市场</string>
     <string name="famerClass">菜农</string>
 
     <string name="delete_item">删除</string>
@@ -15,5 +15,7 @@
 
     <string name="vegetableClass">详细信息：</string>
     <string name="customer_picker">选择客户</string>
+
+    <string name="date_picker_title">数据日期：</string>
 
 </resources>

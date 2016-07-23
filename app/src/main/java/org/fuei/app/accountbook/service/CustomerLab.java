@@ -24,8 +24,8 @@ public class CustomerLab {
         mCustomers = new ArrayList<Customer>();
 
         //select
-        SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openOrCreateDatabase(MainActivity.DBFILE, null);
-        String selectSql = "select * from t_customer";
+        SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openOrCreateDatabase(VariableUtils.DBFILE, null);
+        String selectSql = "select * from t_customer where type = " + VariableUtils.APPTYPE;
         Cursor cursor = sqLiteDatabase.rawQuery(selectSql, null);
 
         ArrayList<Customer> tradeCustomers;

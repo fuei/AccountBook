@@ -26,7 +26,7 @@ public class VegetableLab {
         mVegetables = new ArrayList<Vegetable>();
 
         //select
-        SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openOrCreateDatabase(MainActivity.DBFILE, null);
+        SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openOrCreateDatabase(VariableUtils.DBFILE, null);
         String selectSql = "select * from t_vegetable";
         Cursor cursor = sqLiteDatabase.rawQuery(selectSql, null);
 
