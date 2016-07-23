@@ -44,7 +44,7 @@ public class AllVegetableListFragment extends ListFragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        getActivity().setTitle("客户管理");
+        getActivity().setTitle("商品管理");
         mVeges = VegetableLab.get(getActivity()).getVeges();
 
         VegeAdapter adapter = new VegeAdapter(mVeges);
