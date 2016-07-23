@@ -6,6 +6,7 @@ import android.os.Environment;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.DecimalFormat;
+import java.util.HashMap;
 
 /**
  * Created by fuei on 2016/7/15.
@@ -80,4 +81,30 @@ public class VariableUtils {
 
         return null;
     }
+
+    public enum SheetColumnIndexs {
+        NAME(0),GROSS(1),FRAMECOUNT(2),FRAMEWEIGHT(3),NET(4),UNITPRICE(5),PRICE(6);
+
+        int index;
+        SheetColumnIndexs(int i) {
+            this.index = i;
+        }
+        public int getIndex() {
+            return index;
+        }
+    }
+
+    public enum SheetRowIndexs {
+        WHITEGO(20),GREENGO(21),WHITECOME(22),GREENCOME(23),SUMGO(24),OWE(25),ALLMONEY(26);
+
+        int index;
+        SheetRowIndexs(int i) {
+            this.index = i;
+        }
+        public int getIndex() {
+            return index;
+        }
+    }
+
+
 }

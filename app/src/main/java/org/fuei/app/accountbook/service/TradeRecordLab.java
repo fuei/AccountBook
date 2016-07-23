@@ -29,11 +29,11 @@ public class   TradeRecordLab {
         mCustomerId = customerId;
     }
 
-    public ArrayList<TradeRecord> findTradeRecords() {
+    public ArrayList<TradeRecord> findTradeRecords(int customerId) {
         mTradeRecords = new ArrayList<TradeRecord>();
         //select
         SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openOrCreateDatabase(MainActivity.DBFILE, null);
-        String selectSql = "SELECT t.id, t.vegetable_id, t.customer_id, t.gross_weight, t.net_weight, t.white_frame_count, t.green_frame_count, t.frame_weight, t.unit_price, t.sum_price,t.data_date, v.name FROM t_trade_record t LEFT OUTER JOIN t_vegetable v ON t.vegetable_id = v.id where t.customer_id = "+ VariableUtils.CUSTOMERID +" AND t.data_date = " + VariableUtils.DATADATE;
+        String selectSql = "SELECT t.id, t.vegetable_id, t.customer_id, t.gross_weight, t.net_weight, t.white_frame_count, t.green_frame_count, t.frame_weight, t.unit_price, t.sum_price,t.data_date, v.name FROM t_trade_record t LEFT OUTER JOIN t_vegetable v ON t.vegetable_id = v.id where t.customer_id = "+ customerId +" AND t.data_date = " + VariableUtils.DATADATE;
         Cursor cursor = sqLiteDatabase.rawQuery(selectSql, null);
 
         while (cursor.moveToNext()) {

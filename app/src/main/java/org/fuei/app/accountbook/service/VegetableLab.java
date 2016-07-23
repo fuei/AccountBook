@@ -8,6 +8,7 @@ import org.fuei.app.accountbook.MainActivity;
 import org.fuei.app.accountbook.po.Customer;
 import org.fuei.app.accountbook.po.TradeRecord;
 import org.fuei.app.accountbook.po.Vegetable;
+import org.fuei.app.accountbook.util.VariableUtils;
 
 import java.util.ArrayList;
 
@@ -30,7 +31,7 @@ public class VegetableLab {
         Cursor cursor = sqLiteDatabase.rawQuery(selectSql, null);
 
         ArrayList<TradeRecord> tradeRecords;
-        tradeRecords = new TradeRecordLab().findTradeRecords();
+        tradeRecords = new TradeRecordLab().findTradeRecords(VariableUtils.CUSTOMERID);
         while (cursor.moveToNext()) {
             int id = cursor.getInt(cursor.getColumnIndex("id"));
 

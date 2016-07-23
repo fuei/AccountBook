@@ -70,7 +70,7 @@ public class OutTradeListFragment extends ListFragment {
         VariableUtils.CUSTOMERID = customId;
         Log.d(TAG, "customId: " + customId);
 
-        mTradeRecords = new TradeRecordLab(getActivity(), customId).findTradeRecords();
+        mTradeRecords = new TradeRecordLab(getActivity(), customId).findTradeRecords(customId);
         Log.d("ReacordCount: ", mTradeRecords.size()+"");
 
         TradeRecordAdapter adapter = new TradeRecordAdapter(mTradeRecords);
@@ -80,7 +80,7 @@ public class OutTradeListFragment extends ListFragment {
     @Override
     public void onResume() {
         super.onResume();
-        mTradeRecords = new TradeRecordLab(getActivity(), VariableUtils.CUSTOMERID).findTradeRecords();
+        mTradeRecords = new TradeRecordLab(getActivity(), VariableUtils.CUSTOMERID).findTradeRecords(VariableUtils.CUSTOMERID);
         Log.d("ReacordCount: ", mTradeRecords.size()+"");
 
         TradeRecordAdapter adapter = new TradeRecordAdapter(mTradeRecords);
@@ -166,7 +166,7 @@ public class OutTradeListFragment extends ListFragment {
                             TradeRecordLab tradeRecordLab = new TradeRecordLab(getActivity(), customId);
                             for (int i = adapter.getCount() - 1; i >= 0; i--) {
                                 if (getListView().isItemChecked(i)) {
-                                    tradeRecordLab.findTradeRecords();
+                                    tradeRecordLab.findTradeRecords(customId);
                                     TradeRecord t = adapter.getItem(i);
                                     int success = tradeRecordLab.deleteRecord(t.getId());
                                     if (success == 1) {
@@ -249,7 +249,7 @@ public class OutTradeListFragment extends ListFragment {
         switch (item.getItemId()) {
             case R.id.menu_item_delete:
                 TradeRecordLab t = new TradeRecordLab(getActivity(), mCustomer.getId());
-                t.findTradeRecords();
+                t.findTradeRecords(mCustomer.getId());
                 t.deleteTradeRecord(tradeRecord);
                 adapter.notifyDataSetChanged();
                 return true;

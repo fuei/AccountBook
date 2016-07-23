@@ -30,15 +30,23 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.apache.poi.hssf.record.chart.ValueRangeRecord;
 import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.fuei.app.accountbook.po.Customer;
+import org.fuei.app.accountbook.po.CustomerRemark;
+import org.fuei.app.accountbook.po.TradeRecord;
 import org.fuei.app.accountbook.service.CustomerLab;
+import org.fuei.app.accountbook.service.CustomerRemarkLab;
 import org.fuei.app.accountbook.service.TradeRecordLab;
 import org.fuei.app.accountbook.util.ExportExcel;
 import org.fuei.app.accountbook.util.VariableUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -177,8 +185,11 @@ public class OutCustomerListFragment extends ListFragment {
         } else if (id == R.id.export) {
 
             //获取某个市场类型的客户列表，根据客户循环导出excel
-
-
+            ArrayList<Customer> customers = new TradeRecordLab().findTradeCustomers(VariableUtils.APPTYPE);
+            for (Customer customer: customers) {
+                data2Excel(customer);
+            }
+            Toast.makeText(getActivity(), "导出成功! \n 路径：Android/data/org.fuei.app.accountbook/files1", Toast.LENGTH_LONG).show();
 
 
             return true;
@@ -187,7 +198,13 @@ public class OutCustomerListFragment extends ListFragment {
         return super.onOptionsItemSelected(item);
     }
 
-    private boolean data2Excel() {
+    private boolean data2Excel(Customer customer) {
+        String tempDateStr = (VariableUtils.DATADATE+"");
+        String dateStr = tempDateStr.substring(0,4) + "."
+                + tempDateStr.substring(4,6) + "."
+                + tempDateStr.substring(6,8);
+        Log.d("日期：", dateStr);
+
         InputStream fis = getResources().openRawResource(R.raw.template);;
         HSSFWorkbook wb = null;
         OutputStream fos = null;
@@ -203,30 +220,12 @@ public class OutCustomerListFragment extends ListFragment {
                 return true;
             }
             sheet = wb.getSheetAt(0);
-
-            HSSFCell customerNameCell = sheet.getRow(1).getCell(2);
-            HSSFCell dataDateCell = sheet.getRow(1).getCell(5);
-
-            HSSFCell whiteGoNumCell = sheet.getRow(16).getCell(1);
-            HSSFCell greenGoNumCell = sheet.getRow(17).getCell(1);
-            HSSFCell whiteComeNumCell = sheet.getRow(18).getCell(1);
-            HSSFCell greenComeNumCell = sheet.getRow(19).getCell(1);
-            //退菜
-            //循环写入
-
-            HSSFCell oweMoneyCell = sheet.getRow(23).getCell(6);
-            HSSFCell allMoneyCell = sheet.getRow(24).getCell(6);
-            HSSFCell frameGoSumCell = sheet.getRow(25).getCell(2);
-
-            //菜列表
-            //循环写入
+            //表格复制
+            setCellValue(sheet, customer, dateStr);
 
 
-
-
-            dataDateCell.setCellValue("2016.07.22");
-
-            File file = VariableUtils.ExportExcel2SDCard(getContext(), VariableUtils.APPTYPE+"", "2016.07.22", "大姐");
+            //创建表格
+            File file = VariableUtils.ExportExcel2SDCard(getContext(), VariableUtils.APPTYPE+"", dateStr, customer.getName());
             if (file == null) {
                 Toast.makeText(getActivity(), "导出失败", Toast.LENGTH_LONG);
                 return true;
@@ -255,6 +254,112 @@ public class OutCustomerListFragment extends ListFragment {
             }
         }
         return true;
+    }
+
+    /**
+     * 单元格赋值
+     * @param sheet 工作表
+     */
+    private void setCellValue(HSSFSheet sheet, Customer customer, String dateStr) {
+        HSSFCell customerNameCell = sheet.getRow(1).getCell(2);
+        HSSFCell dataDateCell = sheet.getRow(1).getCell(5);
+
+        HSSFRow whiteGoRow = sheet.getRow(VariableUtils.SheetRowIndexs.WHITEGO.getIndex());
+        HSSFRow greenGoRow = sheet.getRow(VariableUtils.SheetRowIndexs.GREENGO.getIndex());
+        HSSFRow whiteComeRow = sheet.getRow(VariableUtils.SheetRowIndexs.WHITECOME.getIndex());
+        HSSFRow greenComeRow = sheet.getRow(VariableUtils.SheetRowIndexs.GREENCOME.getIndex());
+        HSSFCell frameGoSumCell = sheet.getRow(VariableUtils.SheetRowIndexs.SUMGO.getIndex())
+                .getCell(VariableUtils.SheetColumnIndexs.FRAMECOUNT.getIndex());
+
+        HSSFCell oweMoneyCell = sheet.getRow(VariableUtils.SheetRowIndexs.OWE.getIndex())
+                .getCell(VariableUtils.SheetColumnIndexs.PRICE.getIndex());
+        HSSFCell allMoneyCell = sheet.getRow(VariableUtils.SheetRowIndexs.ALLMONEY.getIndex())
+                .getCell(VariableUtils.SheetColumnIndexs.PRICE.getIndex());
+
+        customerNameCell.setCellValue(customer.getName());
+        dataDateCell.setCellValue(dateStr);
+
+        CustomerRemark customerRemark = new CustomerRemarkLab().findRecordByCustomerId(customer.getId());
+        whiteGoRow.getCell(VariableUtils.SheetColumnIndexs.FRAMECOUNT.getIndex())
+                .setCellValue(customerRemark.getWhiteGo());
+        if (customerRemark.getWhiteGo() != 0) {
+            whiteGoRow.getCell(VariableUtils.SheetColumnIndexs.UNITPRICE.getIndex())
+                    .setCellValue(VariableUtils.WHITE_FRMAE_PRICE);
+            whiteGoRow.getCell(VariableUtils.SheetColumnIndexs.PRICE.getIndex())
+                    .setCellValue(customerRemark.getWhiteGo() * VariableUtils.WHITE_FRMAE_PRICE);
+        }
+        greenGoRow.getCell(VariableUtils.SheetColumnIndexs.FRAMECOUNT.getIndex())
+                .setCellValue(customerRemark.getGreenGo());
+        if (customerRemark.getGreenGo() != 0) {
+            greenGoRow.getCell(VariableUtils.SheetColumnIndexs.UNITPRICE.getIndex())
+                    .setCellValue(VariableUtils.GREEN_FRAME_PRICE);
+            greenGoRow.getCell(VariableUtils.SheetColumnIndexs.PRICE.getIndex())
+                    .setCellValue(customerRemark.getGreenGo() * VariableUtils.GREEN_FRAME_PRICE);
+        }
+
+        whiteComeRow.getCell(VariableUtils.SheetColumnIndexs.FRAMECOUNT.getIndex())
+                .setCellValue(customerRemark.getWhiteCome());
+        if (customerRemark.getWhiteCome() != 0) {
+            whiteComeRow.getCell(VariableUtils.SheetColumnIndexs.UNITPRICE.getIndex())
+                    .setCellValue(VariableUtils.WHITE_FRMAE_PRICE);
+            whiteComeRow.getCell(VariableUtils.SheetColumnIndexs.PRICE.getIndex())
+                    .setCellValue(customerRemark.getWhiteCome() * VariableUtils.WHITE_FRMAE_PRICE);
+        }
+        greenComeRow.getCell(VariableUtils.SheetColumnIndexs.FRAMECOUNT.getIndex())
+                .setCellValue(customerRemark.getGreenCome());
+        if (customerRemark.getGreenCome() != 0) {
+            greenComeRow.getCell(VariableUtils.SheetColumnIndexs.UNITPRICE.getIndex())
+                    .setCellValue(VariableUtils.GREEN_FRAME_PRICE);
+            greenComeRow.getCell(VariableUtils.SheetColumnIndexs.PRICE.getIndex())
+                    .setCellValue(customerRemark.getGreenCome() * VariableUtils.GREEN_FRAME_PRICE);
+        }
+
+        frameGoSumCell.setCellValue(customerRemark.getWhiteGo() + customerRemark.getGreenGo());
+        oweMoneyCell.setCellValue(customerRemark.getOweMoney());
+        allMoneyCell.setCellValue(customerRemark.getAllMoney());
+        //退菜
+        try {
+            JSONArray vegComes = customerRemark.getVegetableCome();
+            int vegComeRowNumber = 17;
+            for (int i = 0; i < vegComes.length(); i++) {
+                JSONObject vegComeObj = vegComes.getJSONObject(i);
+                HSSFRow vegComeRow = sheet.getRow(vegComeRowNumber);
+                vegComeRow.getCell(VariableUtils.SheetColumnIndexs.NAME.getIndex())
+                        .setCellValue(vegComeObj.getString("name"));
+                vegComeRow.getCell(VariableUtils.SheetColumnIndexs.NET.getIndex())
+                        .setCellValue(vegComeObj.getString("weight"));
+                vegComeRow.getCell(VariableUtils.SheetColumnIndexs.UNITPRICE.getIndex())
+                        .setCellValue(vegComeObj.getString("price"));
+                vegComeRow.getCell(VariableUtils.SheetColumnIndexs.PRICE.getIndex())
+                        .setCellValue(vegComeObj.getString("sumPrice"));
+                vegComeRowNumber++;
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        //菜列表
+        ArrayList<TradeRecord> tradeRecords = new TradeRecordLab().findTradeRecords(customer.getId());
+        int tradeRecordRowNum = 3;
+        for (TradeRecord tradeRecord: tradeRecords) {
+            HSSFRow tradeRow = sheet.getRow(tradeRecordRowNum);
+            tradeRow.getCell(VariableUtils.SheetColumnIndexs.NAME.getIndex())
+                    .setCellValue(tradeRecord.getVegetableName());
+            tradeRow.getCell(VariableUtils.SheetColumnIndexs.GROSS.getIndex())
+                    .setCellValue(tradeRecord.getGrossWeight());
+            tradeRow.getCell(VariableUtils.SheetColumnIndexs.FRAMECOUNT.getIndex())
+                    .setCellValue(tradeRecord.getWhiteFrameCount()+tradeRecord.getGreenFrameCount());
+            tradeRow.getCell(VariableUtils.SheetColumnIndexs.FRAMEWEIGHT.getIndex())
+                    .setCellValue(tradeRecord.getFrameWeight());
+            tradeRow.getCell(VariableUtils.SheetColumnIndexs.NET.getIndex())
+                    .setCellValue(tradeRecord.getNetWeight());
+            tradeRow.getCell(VariableUtils.SheetColumnIndexs.UNITPRICE.getIndex())
+                    .setCellValue(tradeRecord.getUnitPrice());
+            tradeRow.getCell(VariableUtils.SheetColumnIndexs.PRICE.getIndex())
+                    .setCellValue(tradeRecord.getSumPrice());
+
+            tradeRecordRowNum++;
+        }
     }
 
 
