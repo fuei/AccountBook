@@ -191,6 +191,7 @@ public class CustomerRemarkFragment extends Fragment {
                                         + "}";
                                 try {
                                     JSONObject jsonObject = (JSONObject) new JSONTokener(jsonStr).nextValue();
+                                    if (mVegComeList == null) mVegComeList = new JSONArray();
                                     mVegComeList.put(jsonObject);
                                 } catch (JSONException e) {
                                     e.printStackTrace();

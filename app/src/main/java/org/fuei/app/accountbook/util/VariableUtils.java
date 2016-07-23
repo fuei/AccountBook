@@ -1,5 +1,10 @@
 package org.fuei.app.accountbook.util;
 
+import android.content.Context;
+import android.os.Environment;
+
+import java.io.File;
+import java.io.FileOutputStream;
 import java.text.DecimalFormat;
 
 /**
@@ -55,5 +60,24 @@ public class VariableUtils {
         String sumPriceAdjust = decimalFormat.format(value);
 
         return sumPriceAdjust;
+    }
+
+    public static File ExportExcel2SDCard(Context context, String appType, String dataDateStr, String customerName) {
+        //判断sd卡是否存在
+        boolean sdCardExist = Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
+
+        if (sdCardExist) {
+            String parentPath = appType + "/" + dataDateStr + "/";
+            String excelFileName = customerName + ".xls";
+            File docPath = new File(context.getExternalFilesDir(null).getAbsolutePath() + parentPath);
+            if (docPath != null && !docPath.exists()) {
+                docPath.mkdirs();
+            }
+
+            File file = new File(docPath, excelFileName);
+            return file;
+        }
+
+        return null;
     }
 }

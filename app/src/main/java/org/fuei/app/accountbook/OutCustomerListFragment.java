@@ -1,9 +1,17 @@
 package org.fuei.app.accountbook;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
 import android.support.v7.app.ActionBar;
@@ -20,14 +28,23 @@ import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.fuei.app.accountbook.po.Customer;
 import org.fuei.app.accountbook.service.CustomerLab;
 import org.fuei.app.accountbook.service.TradeRecordLab;
 import org.fuei.app.accountbook.util.ExportExcel;
 import org.fuei.app.accountbook.util.VariableUtils;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 
 /**
@@ -158,16 +175,87 @@ public class OutCustomerListFragment extends ListFragment {
 
             return true;
         } else if (id == R.id.export) {
-            try {
-                ExportExcel.read(getResources());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+
+            //获取某个市场类型的客户列表，根据客户循环导出excel
+
+
+
+
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+    private boolean data2Excel() {
+        InputStream fis = getResources().openRawResource(R.raw.template);;
+        HSSFWorkbook wb = null;
+        OutputStream fos = null;
+        try {
+            wb = new HSSFWorkbook(fis);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            HSSFSheet sheet = null;
+            if (wb == null) {
+                Toast.makeText(getActivity(), "模板工作簿不存在，导出失败", Toast.LENGTH_LONG);
+                return true;
+            }
+            sheet = wb.getSheetAt(0);
+
+            HSSFCell customerNameCell = sheet.getRow(1).getCell(2);
+            HSSFCell dataDateCell = sheet.getRow(1).getCell(5);
+
+            HSSFCell whiteGoNumCell = sheet.getRow(16).getCell(1);
+            HSSFCell greenGoNumCell = sheet.getRow(17).getCell(1);
+            HSSFCell whiteComeNumCell = sheet.getRow(18).getCell(1);
+            HSSFCell greenComeNumCell = sheet.getRow(19).getCell(1);
+            //退菜
+            //循环写入
+
+            HSSFCell oweMoneyCell = sheet.getRow(23).getCell(6);
+            HSSFCell allMoneyCell = sheet.getRow(24).getCell(6);
+            HSSFCell frameGoSumCell = sheet.getRow(25).getCell(2);
+
+            //菜列表
+            //循环写入
+
+
+
+
+            dataDateCell.setCellValue("2016.07.22");
+
+            File file = VariableUtils.ExportExcel2SDCard(getContext(), VariableUtils.APPTYPE+"", "2016.07.22", "大姐");
+            if (file == null) {
+                Toast.makeText(getActivity(), "导出失败", Toast.LENGTH_LONG);
+                return true;
+            }
+            fos = new FileOutputStream(file);
+            wb.write(fos);
+
+        } catch (Exception e) {
+            Toast.makeText(getActivity(), e.toString(), Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        } finally {
+            try {
+                if (fos != null) {
+                    fos.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                if (wb != null) {
+                    wb.close();
+                }
+                fis.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
+    }
 
 
     private class CustomerAdapter extends ArrayAdapter<Customer> {
@@ -188,11 +276,11 @@ public class OutCustomerListFragment extends ListFragment {
 
             TextView titleTextView = (TextView)convertView.findViewById(R.id.crime_list_item_titleTextView);
             titleTextView.setText(c.getName());
-//            TextView dateTextView = (TextView)convertView.findViewById(R.id.crime_list_item_dateTextView);
-//            dateTextView.setText(c.getAddress().toString());
 
             return convertView;
 
         }
     }
+
+
 }
