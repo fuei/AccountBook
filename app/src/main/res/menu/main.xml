@@ -16,7 +16,7 @@
         android:visible="false"/>
     <item
         android:id="@+id/export"
-        android:title="导出账单"
+        android:title="|| 导出账单 || "
         app:showAsAction="never"
         android:visible="false"/>
 </menu>

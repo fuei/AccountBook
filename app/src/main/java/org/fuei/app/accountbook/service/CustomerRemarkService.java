@@ -4,12 +4,11 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import org.fuei.app.accountbook.MainActivity;
-import org.fuei.app.accountbook.po.Customer;
 import org.fuei.app.accountbook.po.CustomerRemark;
 import org.fuei.app.accountbook.util.VariableUtils;
-
-import java.util.ArrayList;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by fuei on 2016/7/17.
@@ -32,8 +31,8 @@ public class CustomerRemarkService {
             customerRemark.setGreenGo(cursor.getInt(cursor.getColumnIndex("green_go")));
             customerRemark.setGreenCome(cursor.getInt(cursor.getColumnIndex("green_come")));
             customerRemark.setVegetableCome(cursor.getString(cursor.getColumnIndex("vegetable_come")));
-            customerRemark.setOweMoney(cursor.getInt(cursor.getColumnIndex("owe_money")));
-            customerRemark.setAllMoney(cursor.getInt(cursor.getColumnIndex("all_money")));
+            customerRemark.setOweMoney(cursor.getFloat(cursor.getColumnIndex("owe_money")));
+            customerRemark.setAllMoney(cursor.getFloat(cursor.getColumnIndex("all_money")));
             customerRemark.setSumFrame(cursor.getInt(cursor.getColumnIndex("sum_frame")));
             customerRemark.setDataDate(cursor.getInt(cursor.getColumnIndex("data_date")));
         }
@@ -43,22 +42,29 @@ public class CustomerRemarkService {
         return customerRemark;
     }
 
-    public void insertRecord(CustomerRemark c) {
+    public void insertRecord(int customerId) {
         SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openOrCreateDatabase(VariableUtils.DBFILE, null);
 
-//        String insertSql = "insert into t_customer_remark(customer_id, white_go, white_come, green_go, green_come, vegetable_come, owe_money, all_money, sum_frame, data_date) values(?,?,?,?,?,?,?,?,?,?)";
-//
-//        sqLiteDatabase.execSQL(insertSql, new Object[]{c.getCustomerId(), c.getWhiteGo(), c.getWhiteCome(), c.getGreenGo(), c.getGreenCome(), c.getVegetableCome(), c.getOweMoney(), c.getAllMoney(), c.getSumFrame(), c.getDataDate()});
+        Cursor cursor = sqLiteDatabase.rawQuery("select id from t_customer_remark where customer_id = "+ customerId +" AND data_date = " + VariableUtils.DATADATE, null);
+        int id = 0;
+        if(cursor.moveToFirst())
+            id = cursor.getInt(0);
+        if (id != 0) {
+            sqLiteDatabase.close();
+            return;
+        }
 
-        sqLiteDatabase.insert("t_customer_remark", null, createValues(c));
+        ContentValues vals = new ContentValues();
+        vals.put("customer_id", customerId);
+        vals.put("data_date", VariableUtils.DATADATE);
 
+        sqLiteDatabase.insert("t_customer_remark", null, vals);
         sqLiteDatabase.close();
     }
 
     public int updateRecord(CustomerRemark c) {
 
         SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openOrCreateDatabase(VariableUtils.DBFILE, null);
-
 
         int flag = sqLiteDatabase.update("t_customer_remark", createValues(c), "id = " + c.getId(), null);
 
@@ -71,7 +77,6 @@ public class CustomerRemarkService {
 
         SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openOrCreateDatabase(VariableUtils.DBFILE, null);
 
-        ContentValues cv = new ContentValues();
         String[] args = {String.valueOf(customerId), String.valueOf(VariableUtils.DATADATE)};
         int flag = sqLiteDatabase.delete("t_customer_remark", "customer_id = ? AND data_date = ?", args);
 
@@ -80,33 +85,52 @@ public class CustomerRemarkService {
         return flag;
     }
 
-    public void insertOrUpdateFrameCount(int customerId) {
+    public void defaultUpdateRecord(int customerId) {
         SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openOrCreateDatabase(VariableUtils.DBFILE, null);
-        Cursor cursor = sqLiteDatabase.rawQuery("select id from t_customer_remark where customer_id = "+ customerId +" AND data_date = " + VariableUtils.DATADATE, null);
-        int id = 0;
-        if(cursor.moveToFirst())
-            id = cursor.getInt(0);
 
-        Cursor cursor1 = sqLiteDatabase.rawQuery("SELECT sum(white_frame_count) w, sum(green_frame_count) g FROM t_trade_record WHERE customer_id = " + customerId + " AND data_date = " + VariableUtils.DATADATE, null);
-        int wFrameCount = 0;
-        int gFrameCount = 0;
-        if (cursor1.moveToFirst()) {
-            wFrameCount = cursor1.getInt(cursor1.getColumnIndex("w"));
-            gFrameCount = cursor1.getInt(cursor1.getColumnIndex("g"));
-        }
+        CustomerRemark cr = findRecordByCustomerId(customerId);
+        if (cr != null) {
+            Cursor cursor1 = sqLiteDatabase.rawQuery("SELECT sum(white_frame_count) w, sum(green_frame_count) g FROM t_trade_record WHERE customer_id = " + customerId + " AND data_date = " + VariableUtils.DATADATE, null);
 
-        ContentValues vals = new ContentValues();
-        vals.put("customer_id", customerId);
-        vals.put("white_go", wFrameCount);
-        vals.put("green_go", gFrameCount);
-        vals.put("sum_frame", wFrameCount + gFrameCount);
-        vals.put("data_date", VariableUtils.DATADATE);
-        if (id == 0) {
-            // insert
-            sqLiteDatabase.insert("t_customer_remark", null, vals);
-        } else {
-            // update
-            sqLiteDatabase.update("t_customer_remark", vals, "id = " + id, null);
+            if (cursor1.moveToFirst()) {
+                cr.setWhiteGo(cursor1.getInt(cursor1.getColumnIndex("w")));
+                cr.setGreenGo(cursor1.getInt(cursor1.getColumnIndex("g")));
+            }
+            float tradeSumPrice = new TradeRecordService().findSumPrice(customerId, VariableUtils.DATADATE);
+            float vegComePrice = 0;
+            try {
+                JSONArray jsonArray = null;
+                jsonArray = cr.getVegetableCome();
+                if (jsonArray != null) {
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonObject = (JSONObject) jsonArray.get(i);
+                        vegComePrice += Float.parseFloat(jsonObject.get("sumPrice").toString());
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            //总价
+            float sumPrice = 0;
+            if (VariableUtils.APPTYPE == VariableUtils.ENUM_APP_TYPE.OUT.getAppType()) {
+
+                //筐钱
+                float framePrice = (cr.getWhiteGo()-cr.getWhiteCome()) * VariableUtils.WHITE_FRMAE_PRICE + (cr.getGreenGo()-cr.getGreenCome()) * VariableUtils.GREEN_FRAME_PRICE;
+                sumPrice = tradeSumPrice + framePrice + cr.getOweMoney() - vegComePrice;
+
+            } else if (VariableUtils.APPTYPE == VariableUtils.ENUM_APP_TYPE.IN.getAppType()) {
+
+                sumPrice = tradeSumPrice + cr.getOweMoney() - vegComePrice;
+
+            } else {
+
+                sumPrice = (int)(tradeSumPrice + cr.getOweMoney() - vegComePrice);
+            }
+
+            cr.setAllMoney(sumPrice);
+
+            updateRecord(cr);
         }
         sqLiteDatabase.close();
     }

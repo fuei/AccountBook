@@ -12,12 +12,11 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ContextThemeWrapper;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import org.fuei.app.accountbook.settings.AllCustomerListActivity;
 import org.fuei.app.accountbook.settings.AllVegetableListActivity;
@@ -48,6 +47,7 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             toolbar.setTitle(R.string.outClass);
+            toolbar.setSubtitle(VariableUtils.GetDateStr());
             setSupportActionBar(toolbar);
         }
 
@@ -56,6 +56,30 @@ public class MainActivity extends AppCompatActivity
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         if (drawer != null) {
             drawer.setDrawerListener(toggle);
+            drawer.addDrawerListener(new DrawerLayout.DrawerListener() {
+                @Override
+                public void onDrawerSlide(View drawerView, float slideOffset) {
+
+                }
+
+                @Override
+                public void onDrawerOpened(View drawerView) {
+
+                }
+
+                @Override
+                public void onDrawerClosed(View drawerView) {
+                    ActionBar actionBar = getSupportActionBar();
+                    if (actionBar != null) {
+                        refreshFragment(new CustomerListFragment());
+                    }
+                }
+
+                @Override
+                public void onDrawerStateChanged(int newState) {
+
+                }
+            });
         }
         toggle.syncState();
 
@@ -101,7 +125,7 @@ public class MainActivity extends AppCompatActivity
         ActionBar actionBar = getSupportActionBar();
         switch (id) {
             case R.id.nav_out:
-                VariableUtils.APPTYPE = VariableUtils.APP_TYPE.OUT.getAppType();
+                VariableUtils.APPTYPE = VariableUtils.ENUM_APP_TYPE.OUT.getAppType();
                 if (actionBar != null) {
                     actionBar.setTitle(R.string.outClass);
                 }
@@ -109,7 +133,7 @@ public class MainActivity extends AppCompatActivity
 
                 break;
             case R.id.nav_in:
-                VariableUtils.APPTYPE = VariableUtils.APP_TYPE.IN.getAppType();
+                VariableUtils.APPTYPE = VariableUtils.ENUM_APP_TYPE.IN.getAppType();
                 if (actionBar != null) {
                     actionBar.setTitle(R.string.inClass);
                 }
@@ -117,7 +141,7 @@ public class MainActivity extends AppCompatActivity
 
                 break;
             case R.id.nav_farmer:
-                VariableUtils.APPTYPE = VariableUtils.APP_TYPE.FAMER.getAppType();
+                VariableUtils.APPTYPE = VariableUtils.ENUM_APP_TYPE.FAMER.getAppType();
                 if (actionBar != null) {
                     actionBar.setTitle(R.string.famerClass);
                 }
@@ -137,7 +161,12 @@ public class MainActivity extends AppCompatActivity
                 }
                 break;
             case R.id.customer_manage:
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                AlertDialog.Builder builder = null;
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                    builder = new AlertDialog.Builder(new ContextThemeWrapper(this, android.R.style.Theme_Material_Dialog_Alert));
+                } else {
+                    builder = new AlertDialog.Builder(this);
+                }
                 builder.setTitle("客户类型")
                         .setItems(R.array.apptype, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
@@ -166,16 +195,20 @@ public class MainActivity extends AppCompatActivity
         if (drawer != null) {
             drawer.closeDrawer(GravityCompat.START);
 
-            FragmentManager fm = getSupportFragmentManager();
-            Fragment fragment = fm.findFragmentById(R.id.fragmentContainer);
-            if (fragment != null) {
-                fm.beginTransaction().remove(fragment).commit();
-            }
-            fragment = currentFrag;
-            fm.beginTransaction()
-                    .add(R.id.fragmentContainer, fragment)
-                    .commit();
+            refreshFragment(currentFrag);
         }
+    }
+
+    private void refreshFragment(Fragment currentFrag) {
+        FragmentManager fm = getSupportFragmentManager();
+        Fragment fragment = fm.findFragmentById(R.id.fragmentContainer);
+        if (fragment != null) {
+            fm.beginTransaction().remove(fragment).commit();
+        }
+        fragment = currentFrag;
+        fm.beginTransaction()
+                .add(R.id.fragmentContainer, fragment)
+                .commit();
     }
 
 }

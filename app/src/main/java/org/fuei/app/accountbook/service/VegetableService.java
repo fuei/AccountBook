@@ -43,7 +43,7 @@ public class VegetableService {
                 Vegetable v = new Vegetable();
                 v.setId(id);
                 v.setName(cursor.getString(cursor.getColumnIndex("name")));
-                v.setUnitPrice(cursor.getInt(cursor.getColumnIndex("unit_price")));
+                v.setUnitPrice(cursor.getFloat(cursor.getColumnIndex("unit_price")));
                 mVegetables.add(v);
             }
         }

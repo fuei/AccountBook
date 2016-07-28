@@ -1,5 +1,7 @@
 package org.fuei.app.accountbook.po;
 
+import org.fuei.app.accountbook.util.VariableUtils;
+
 /**
  * Created by fuei on 2016/7/16.
  */
@@ -29,6 +31,6 @@ public class Vegetable {
     }
 
     public void setUnitPrice(float unit_price) {
-        this.unit_price = unit_price;
+        this.unit_price = VariableUtils.SaveOneNum(unit_price);
     }
 }

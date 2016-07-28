@@ -1,5 +1,7 @@
 package org.fuei.app.accountbook.po;
 
+import org.fuei.app.accountbook.util.VariableUtils;
+
 /**
  * Created by fuei on 2016/7/11.
  */
@@ -46,7 +48,7 @@ public class TradeRecord {
     }
 
     public void setUnitPrice(float unit_price) {
-        this.unit_price = unit_price;
+        this.unit_price = VariableUtils.SaveOneNum(unit_price);
     }
 
     public int getCustomerId() {
@@ -62,7 +64,7 @@ public class TradeRecord {
     }
 
     public void setGrossWeight(float gross_weight) {
-        this.gross_weight = gross_weight;
+        this.gross_weight = VariableUtils.SaveOneNum(gross_weight);
     }
 
     public float getNetWeight() {
@@ -70,7 +72,7 @@ public class TradeRecord {
     }
 
     public void setNetWeight(float net_weight) {
-        this.net_weight = net_weight;
+        this.net_weight = VariableUtils.SaveOneNum(net_weight);
     }
 
     public int getWhiteFrameCount() {
@@ -86,7 +88,7 @@ public class TradeRecord {
     }
 
     public void setFrameWeight(float frame_weight) {
-        this.frame_weight = frame_weight;
+        this.frame_weight = VariableUtils.SaveOneNum(frame_weight);
     }
 
     public float getSumPrice() {
@@ -94,7 +96,7 @@ public class TradeRecord {
     }
 
     public void setSumPrice(float sum_price) {
-        this.sum_price = sum_price;
+        this.sum_price = VariableUtils.SaveOneNum(sum_price);
     }
 
     public int getDataDate() {

@@ -25,6 +25,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.fuei.app.accountbook.R;
 import org.fuei.app.accountbook.po.Customer;
@@ -144,6 +145,14 @@ public class AllCustomerListFragment extends ListFragment {
                                 Customer c = new Customer();
                                 c.setName(cName);
                                 c.setType(VariableUtils.APPTYPE);
+
+                                for (Customer tempC: mCustomers) {
+                                    if (cName.equals(tempC.getName()) && (VariableUtils.APPTYPE == tempC.getType())) {
+                                        Toast.makeText(getActivity(), "该客户已存在！", Toast.LENGTH_LONG).show();
+                                        return;
+                                    }
+                                }
+
                                 CustomerLab.get(getActivity()).addCustomer(c);
                                 CustomerAdapter adapter = (CustomerAdapter)getListAdapter();
                                 adapter.add(c);

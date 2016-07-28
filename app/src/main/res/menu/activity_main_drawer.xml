@@ -5,7 +5,7 @@
         <item
             android:id="@+id/nav_out"
             android:icon="@drawable/ic_menu_gallery"
-            android:title="@string/outClass" />
+            android:title="@string/outClass"  />
         <item
             android:id="@+id/nav_in"
             android:icon="@drawable/ic_menu_send"
@@ -26,11 +26,11 @@
             <item
                 android:id="@+id/customer_manage"
                 android:icon="@drawable/ic_menu_camera"
-                android:title="客户" />
+                android:title="客户管理" />
             <item
                 android:id="@+id/vegetable_manage"
                 android:icon="@drawable/ic_menu_manage"
-                android:title="商品" />
+                android:title="商品管理" />
         </menu>
     </item>
 

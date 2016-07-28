@@ -1,5 +1,6 @@
 package org.fuei.app.accountbook.po;
 
+import org.fuei.app.accountbook.util.VariableUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -94,7 +95,7 @@ public class CustomerRemark {
     }
 
     public void setOweMoney(float owe_money) {
-        this.owe_money = owe_money;
+        this.owe_money = VariableUtils.SaveOneNum(owe_money);
     }
 
     public float getAllMoney() {
@@ -102,7 +103,7 @@ public class CustomerRemark {
     }
 
     public void setAllMoney(float all_money) {
-        this.all_money = all_money;
+        this.all_money = VariableUtils.SaveOneNum(all_money);
     }
 
     public int getSumFrame() {

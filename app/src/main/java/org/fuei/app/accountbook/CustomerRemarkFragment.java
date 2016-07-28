@@ -52,6 +52,7 @@ public class CustomerRemarkFragment extends Fragment {
     private CustomerRemark mCustomerRemark;
     private JSONArray mVegComeList = null;
     private TradeRecord mVegComeObject;
+    private ArrayList<TradeRecord> mTradeRecords = null;
 
     public static CustomerRemarkFragment newInstance(int crId) {
         Bundle args = new Bundle();
@@ -67,6 +68,9 @@ public class CustomerRemarkFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         mCustomerId = (int)getArguments().getSerializable(EXTRA_CR_ID);
+        //汇总
+        new CustomerRemarkService().defaultUpdateRecord(mCustomerId);
+
         mCustomerRemark = new CustomerRemarkService().findRecordByCustomerId(mCustomerId);
 
         setHasOptionsMenu(true);
@@ -94,11 +98,14 @@ public class CustomerRemarkFragment extends Fragment {
         mGFrameGoTxt.setText(mCustomerRemark.getGreenGo()+"");
 
         mWFrameComeTxt = (EditText) view.findViewById(R.id.editText_wFraCount_come);
-        mWFrameComeTxt.setText(mCustomerRemark.getWhiteCome()+"");
+        mWFrameComeTxt.setHint(mCustomerRemark.getWhiteCome()+"");
+
         mGFrameComeTxt = (EditText) view.findViewById(R.id.editText_gFraCount_come);
-        mGFrameComeTxt.setText(mCustomerRemark.getGreenCome()+"");
+        mGFrameComeTxt.setHint(mCustomerRemark.getGreenCome()+"");
+
         mOweMoneyTxt = (EditText) view.findViewById(R.id.editText_oweMoney);
-        mOweMoneyTxt.setText(mCustomerRemark.getOweMoney()+"");
+        mOweMoneyTxt.setHint(mCustomerRemark.getOweMoney()+"");
+
         mAllMoneyTxt = (TextView) view.findViewById(R.id.textView_allMoney);
         mAllMoneyTxt.setText(mCustomerRemark.getAllMoney()+"");
 
@@ -179,7 +186,7 @@ public class CustomerRemarkFragment extends Fragment {
                                 }
                                 vegComeWeightTxt.setText(weightStr);
                                 TextView vegComeSumPriceTxt = (TextView)v.findViewById(R.id.textView_vegComeSumPrice);
-                                String sumPrice = VariableUtils.SaveOneNum(Float.parseFloat(priceEditText.getText().toString())*Float.parseFloat(weightEditText.getText().toString()));
+                                String sumPrice = VariableUtils.FloatToStr(VariableUtils.SaveOneNum(Float.parseFloat(priceEditText.getText().toString())*Float.parseFloat(weightEditText.getText().toString())));
                                 vegComeSumPriceTxt.setText(sumPrice);
                                 //转为JSON对象，存入JSON数组
                                 String jsonStr = "{"
@@ -205,15 +212,21 @@ public class CustomerRemarkFragment extends Fragment {
                 dialog.setOnShowListener(new DialogInterface.OnShowListener() {
                     @Override
                     public void onShow(DialogInterface dialog) {
-                        final ArrayList<TradeRecord> tradeRecords = new TradeRecordService().findVegetableList(mCustomerId, VariableUtils.DATADATE);
-                        ArrayAdapter<TradeRecord> adapter = new ArrayAdapter<TradeRecord>(getActivity(),android.R.layout.simple_spinner_item, tradeRecords);
+
+                        if (VariableUtils.APPTYPE == VariableUtils.ENUM_APP_TYPE.OUT.getAppType()) {
+                            mTradeRecords = new TradeRecordService().findVegetableList(mCustomerId, VariableUtils.DATADATE - 1);
+                        } else if (VariableUtils.APPTYPE == VariableUtils.ENUM_APP_TYPE.IN.getAppType()) {
+                            mTradeRecords = new TradeRecordService().findVegetableList(mCustomerId, VariableUtils.DATADATE);
+                        }
+                        if (mTradeRecords == null) return;
+                        ArrayAdapter<TradeRecord> adapter = new ArrayAdapter<TradeRecord>(getActivity(),android.R.layout.simple_spinner_item, mTradeRecords);
                         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         // Apply the adapter to the spinner
                         nameSpinner.setAdapter(adapter);
                         nameSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                             @Override
                             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                                mVegComeObject = tradeRecords.get(position);
+                                mVegComeObject = mTradeRecords.get(position);
                                 priceEditText.setText(mVegComeObject.getUnitPrice()+"");
                             }
 
@@ -256,25 +269,33 @@ public class CustomerRemarkFragment extends Fragment {
                 //菜总价
                 float tradeSumPrice = new TradeRecordService().findSumPrice(mCustomerId, VariableUtils.DATADATE);
                 //退白筐数
+                int whiteComeNum = 0;
                 String wFrameComeStr = mWFrameComeTxt.getText().toString();
                 if (wFrameComeStr==null || wFrameComeStr.trim().equals("")) {
                     wFrameComeStr = mWFrameComeTxt.getHint().toString();
                     if (wFrameComeStr==null || wFrameComeStr.trim().equals("")) {
                         wFrameComeStr = "0";
-                        return false;
+                    } else {
+                        whiteComeNum = Integer.parseInt(wFrameComeStr);
                     }
+                } else {
+                    whiteComeNum = Integer.parseInt(wFrameComeStr);
                 }
-                int whiteComeNum = Integer.parseInt(wFrameComeStr);
+
                 //退绿筐数
+                int greenComeNum = 0;
                 String gFrameComeStr = mGFrameComeTxt.getText().toString();
                 if (gFrameComeStr==null || gFrameComeStr.trim().equals("")) {
                     gFrameComeStr = mGFrameComeTxt.getHint().toString();
                     if (gFrameComeStr==null || gFrameComeStr.trim().equals("")) {
                         gFrameComeStr = "0";
-                        return false;
+                    } else {
+                        greenComeNum = Integer.parseInt(gFrameComeStr);
                     }
+                } else {
+                    greenComeNum = Integer.parseInt(gFrameComeStr);
                 }
-                int greenComeNum = Integer.parseInt(gFrameComeStr);
+
                 //白筐总价
                 float whitePrice = (Integer.parseInt(mWFrameGoTxt.getText().toString()) - whiteComeNum) * VariableUtils.WHITE_FRMAE_PRICE;
                 //绿筐总价
@@ -282,15 +303,18 @@ public class CustomerRemarkFragment extends Fragment {
                 //筐总价
                 float framePrice = whitePrice + greenPrice;
                 //欠款
+                float owePrice = 0;
                 String owePriceStr = mOweMoneyTxt.getText().toString();
                 if (owePriceStr==null || owePriceStr.trim().equals("")) {
                     owePriceStr = mOweMoneyTxt.getHint().toString();
                     if (owePriceStr==null || owePriceStr.trim().equals("")) {
                         owePriceStr = "0";
-                        return false;
+                    } else {
+                        owePrice = Float.parseFloat(owePriceStr);
                     }
+                } else {
+                    owePrice = Float.parseFloat(owePriceStr);
                 }
-                float owePrice = Float.parseFloat(owePriceStr);
 
                 //退菜总价
                 float vegComePrice = 0;
@@ -306,9 +330,17 @@ public class CustomerRemarkFragment extends Fragment {
                 }
 
                 //总价
-                float sumPrice = tradeSumPrice + framePrice + owePrice - vegComePrice;
+                float sumPrice = 0;
+                if (VariableUtils.APPTYPE == VariableUtils.ENUM_APP_TYPE.OUT.getAppType()) {
+                    sumPrice = tradeSumPrice + framePrice + owePrice - vegComePrice;
+                } else if (VariableUtils.APPTYPE == VariableUtils.ENUM_APP_TYPE.IN.getAppType()) {
+                    sumPrice = tradeSumPrice + owePrice - vegComePrice;
+                } else {
+                    sumPrice = (int)(tradeSumPrice + owePrice - vegComePrice);
+                }
+
                 //界面显示
-                mAllMoneyTxt.setText(VariableUtils.SaveOneNum(sumPrice));
+                mAllMoneyTxt.setText(sumPrice+"");
                 //数据入库
                 mCustomerRemark.setWhiteCome(whiteComeNum);
                 mCustomerRemark.setGreenCome(greenComeNum);
@@ -320,7 +352,7 @@ public class CustomerRemarkFragment extends Fragment {
 
                 int flag = new CustomerRemarkService().updateRecord(mCustomerRemark);
 
-
+                getActivity().finish();
             default:
                 return super.onOptionsItemSelected(item);
         }

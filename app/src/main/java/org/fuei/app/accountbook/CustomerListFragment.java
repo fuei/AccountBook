@@ -1,5 +1,6 @@
 package org.fuei.app.accountbook;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -7,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ActionMode;
@@ -22,10 +24,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellReference;
 import org.fuei.app.accountbook.po.Customer;
 import org.fuei.app.accountbook.po.CustomerRemark;
 import org.fuei.app.accountbook.po.TradeRecord;
@@ -81,6 +84,9 @@ public class CustomerListFragment extends ListFragment {
             }
         } else {
             final ActionBar actionBar = (ActionBar)((AppCompatActivity)getActivity()).getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.setSubtitle(VariableUtils.GetDateStr());
+            }
 
             if (listView != null) {
                 listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
@@ -166,29 +172,44 @@ public class CustomerListFragment extends ListFragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_add) {
             // 弹出选择客户的对话框
             FragmentManager fm = getActivity().getSupportFragmentManager();
-            TypePickerFragment dialog = TypePickerFragment.newInstance(VariableUtils.DIALOG_TYPE.CUSTOMER.getDialogType(),VariableUtils.APP_TYPE.OUT.getAppType());
+            TypePickerFragment dialog = TypePickerFragment.newInstance(VariableUtils.DIALOG_TYPE.CUSTOMER.getDialogType(), VariableUtils.ENUM_APP_TYPE.OUT.getAppType());
 
 //            dialog.setTargetFragment(TradeListFragment.class, REQUEST_CUSTOMER);
             dialog.show(fm, DIALOG_CUSTOMER);
 
             return true;
         } else if (id == R.id.export) {
+            // 1. Instantiate an AlertDialog.Builder with its constructor
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-            //获取某个市场类型的客户列表，根据客户循环导出excel
-            ArrayList<Customer> customers = new TradeRecordService().findTradeCustomers(VariableUtils.APPTYPE);
-            for (Customer customer: customers) {
-                data2Excel(customer);
-            }
-            Toast.makeText(getActivity(), "导出成功! \n 路径：Android/data/org.fuei.app.accountbook/files1", Toast.LENGTH_LONG).show();
+            // 2. Chain together various setter methods to set the dialog characteristics
+            builder.setMessage("是否导出账单？")
+                    .setPositiveButton("是", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //获取某个市场类型的客户列表，根据客户循环导出excel
+                            ArrayList<Customer> customers = new TradeRecordService().findTradeCustomers(VariableUtils.APPTYPE);
+                            for (Customer customer: customers) {
+                                data2Excel(customer);
+                            }
+                            Toast.makeText(getActivity(), "导出成功! \n 路径：Android/data/org.fuei.app.accountbook/files", Toast.LENGTH_LONG).show();
+                        }
+                    })
+                    .setNegativeButton("否", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    });
+
+            // 3. Get the AlertDialog from create()
+            AlertDialog dialog = builder.create();
+            dialog.show();
 
             return true;
         }
@@ -200,7 +221,7 @@ public class CustomerListFragment extends ListFragment {
         String dateStr = VariableUtils.DataDateFormat(VariableUtils.DATADATE);
 
         InputStream fis = getResources().openRawResource(R.raw.template);;
-        HSSFWorkbook wb = null;
+        Workbook wb = null;
         OutputStream fos = null;
         try {
             wb = new HSSFWorkbook(fis);
@@ -208,17 +229,17 @@ public class CustomerListFragment extends ListFragment {
             e.printStackTrace();
         }
         try {
-            HSSFSheet sheet = null;
+            Sheet sheet = null;
             if (wb == null) {
                 Toast.makeText(getActivity(), "模板工作簿不存在，导出失败", Toast.LENGTH_LONG);
                 return true;
             }
             sheet = wb.getSheetAt(0);
             //表格复制
-            setCellValue(sheet, customer, dateStr);
+            setCellValue(wb, sheet, customer, dateStr);
 
             //创建表格
-            File file = VariableUtils.ExportExcel2SDCard(getContext(), VariableUtils.APPTYPE+"", dateStr, customer.getName());
+            File file = VariableUtils.ExportExcel2SDCard(getContext(), VariableUtils.APPTYPE, dateStr, customer.getName());
             if (file == null) {
                 Toast.makeText(getActivity(), "导出失败", Toast.LENGTH_LONG);
                 return true;
@@ -232,7 +253,7 @@ public class CustomerListFragment extends ListFragment {
         } finally {
             try {
                 if (fos != null) {
-                    fos.close();
+                    fos.close() ;
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -253,79 +274,75 @@ public class CustomerListFragment extends ListFragment {
      * 单元格赋值
      * @param sheet 工作表
      */
-    private void setCellValue(HSSFSheet sheet, Customer customer, String dateStr) {
-        HSSFCell customerNameCell = sheet.getRow(1).getCell(2);
-        HSSFCell dataDateCell = sheet.getRow(1).getCell(5);
-
-        HSSFRow whiteGoRow = sheet.getRow(VariableUtils.SheetRowIndexs.WHITEGO.getIndex());
-        HSSFRow greenGoRow = sheet.getRow(VariableUtils.SheetRowIndexs.GREENGO.getIndex());
-        HSSFRow whiteComeRow = sheet.getRow(VariableUtils.SheetRowIndexs.WHITECOME.getIndex());
-        HSSFRow greenComeRow = sheet.getRow(VariableUtils.SheetRowIndexs.GREENCOME.getIndex());
-        HSSFCell frameGoSumCell = sheet.getRow(VariableUtils.SheetRowIndexs.SUMGO.getIndex())
-                .getCell(VariableUtils.SheetColumnIndexs.FRAMECOUNT.getIndex());
-
-        HSSFCell oweMoneyCell = sheet.getRow(VariableUtils.SheetRowIndexs.OWE.getIndex())
-                .getCell(VariableUtils.SheetColumnIndexs.PRICE.getIndex());
-        HSSFCell allMoneyCell = sheet.getRow(VariableUtils.SheetRowIndexs.ALLMONEY.getIndex())
-                .getCell(VariableUtils.SheetColumnIndexs.PRICE.getIndex());
-
-        customerNameCell.setCellValue(customer.getName());
-        dataDateCell.setCellValue(dateStr);
+    private void setCellValue(Workbook wb, Sheet sheet, Customer customer, String dateStr) {
+        VariableUtils.SetSingleCellValue(wb, sheet, "customer_name", customer.getName());
+        VariableUtils.SetSingleCellValue(wb, sheet, "data_date", dateStr);
 
         CustomerRemark customerRemark = new CustomerRemarkService().findRecordByCustomerId(customer.getId());
-        whiteGoRow.getCell(VariableUtils.SheetColumnIndexs.FRAMECOUNT.getIndex())
-                .setCellValue(customerRemark.getWhiteGo());
         if (customerRemark.getWhiteGo() != 0) {
-            whiteGoRow.getCell(VariableUtils.SheetColumnIndexs.UNITPRICE.getIndex())
-                    .setCellValue(VariableUtils.WHITE_FRMAE_PRICE);
-            whiteGoRow.getCell(VariableUtils.SheetColumnIndexs.PRICE.getIndex())
-                    .setCellValue(customerRemark.getWhiteGo() * VariableUtils.WHITE_FRMAE_PRICE);
+            VariableUtils.SetSingleCellValue(wb, sheet, "white_go", customerRemark.getWhiteGo()+"");
         }
-        greenGoRow.getCell(VariableUtils.SheetColumnIndexs.FRAMECOUNT.getIndex())
-                .setCellValue(customerRemark.getGreenGo());
         if (customerRemark.getGreenGo() != 0) {
-            greenGoRow.getCell(VariableUtils.SheetColumnIndexs.UNITPRICE.getIndex())
-                    .setCellValue(VariableUtils.GREEN_FRAME_PRICE);
-            greenGoRow.getCell(VariableUtils.SheetColumnIndexs.PRICE.getIndex())
-                    .setCellValue(customerRemark.getGreenGo() * VariableUtils.GREEN_FRAME_PRICE);
+            VariableUtils.SetSingleCellValue(wb, sheet, "green_go", customerRemark.getGreenGo()+"");
         }
-
-        whiteComeRow.getCell(VariableUtils.SheetColumnIndexs.FRAMECOUNT.getIndex())
-                .setCellValue(customerRemark.getWhiteCome());
         if (customerRemark.getWhiteCome() != 0) {
-            whiteComeRow.getCell(VariableUtils.SheetColumnIndexs.UNITPRICE.getIndex())
-                    .setCellValue(VariableUtils.WHITE_FRMAE_PRICE);
-            whiteComeRow.getCell(VariableUtils.SheetColumnIndexs.PRICE.getIndex())
-                    .setCellValue(customerRemark.getWhiteCome() * VariableUtils.WHITE_FRMAE_PRICE);
+            VariableUtils.SetSingleCellValue(wb, sheet, "aaa", customerRemark.getWhiteCome()+"");
         }
-        greenComeRow.getCell(VariableUtils.SheetColumnIndexs.FRAMECOUNT.getIndex())
-                .setCellValue(customerRemark.getGreenCome());
         if (customerRemark.getGreenCome() != 0) {
-            greenComeRow.getCell(VariableUtils.SheetColumnIndexs.UNITPRICE.getIndex())
-                    .setCellValue(VariableUtils.GREEN_FRAME_PRICE);
-            greenComeRow.getCell(VariableUtils.SheetColumnIndexs.PRICE.getIndex())
-                    .setCellValue(customerRemark.getGreenCome() * VariableUtils.GREEN_FRAME_PRICE);
+            VariableUtils.SetSingleCellValue(wb, sheet, "green_come", customerRemark.getGreenCome()+"");
         }
 
-        frameGoSumCell.setCellValue(customerRemark.getWhiteGo() + customerRemark.getGreenGo());
-        oweMoneyCell.setCellValue(customerRemark.getOweMoney());
-        allMoneyCell.setCellValue(customerRemark.getAllMoney());
+        if (VariableUtils.APPTYPE == VariableUtils.ENUM_APP_TYPE.OUT.getAppType()) {
+            if (customerRemark.getWhiteGo() != 0) {
+                VariableUtils.SetSingleCellValue(wb, sheet, "w_go_unitprice", VariableUtils.FloatToStr(VariableUtils.WHITE_FRMAE_PRICE));
+                VariableUtils.SetSingleCellValue(wb, sheet, "w_go_sumprice", VariableUtils.FloatToStr((customerRemark.getWhiteGo() * VariableUtils.WHITE_FRMAE_PRICE)));
+            }
+
+            if (customerRemark.getGreenGo() != 0) {
+                VariableUtils.SetSingleCellValue(wb, sheet, "g_go_unitprice", VariableUtils.FloatToStr(VariableUtils.GREEN_FRAME_PRICE));
+                VariableUtils.SetSingleCellValue(wb, sheet, "g_go_sumprice", VariableUtils.FloatToStr((customerRemark.getGreenGo() * VariableUtils.GREEN_FRAME_PRICE)));
+            }
+
+            if (customerRemark.getWhiteCome() != 0) {
+                VariableUtils.SetSingleCellValue(wb, sheet, "w_come_unitprice", VariableUtils.FloatToStr(VariableUtils.WHITE_FRMAE_PRICE));
+                VariableUtils.SetSingleCellValue(wb, sheet, "w_come_sumprice", VariableUtils.FloatToStr((customerRemark.getWhiteCome() * VariableUtils.WHITE_FRMAE_PRICE)));
+            }
+
+            if (customerRemark.getGreenCome() != 0) {
+                VariableUtils.SetSingleCellValue(wb, sheet, "g_come_unitprice", VariableUtils.FloatToStr(VariableUtils.GREEN_FRAME_PRICE));
+                VariableUtils.SetSingleCellValue(wb, sheet, "g_come_sumprice", VariableUtils.FloatToStr((customerRemark.getGreenCome() * VariableUtils.GREEN_FRAME_PRICE)));
+            }
+        }
+
+        int sumFrameCount = customerRemark.getWhiteGo()+customerRemark.getGreenGo();
+        if (sumFrameCount != 0) {
+            VariableUtils.SetSingleCellValue(wb, sheet, "sum_frame", sumFrameCount+"");
+        }
+        if (customerRemark.getOweMoney() != 0) {
+            VariableUtils.SetSingleCellValue(wb, sheet, "owe_money", VariableUtils.FloatToStr(customerRemark.getOweMoney()));
+        }
+        VariableUtils.SetSingleCellValue(wb, sheet, "all_money", VariableUtils.FloatToStr(customerRemark.getAllMoney()));
+
         //退菜
         try {
             JSONArray vegComes = customerRemark.getVegetableCome();
-            int vegComeRowNumber = 17;
-            for (int i = 0; i < vegComes.length(); i++) {
-                JSONObject vegComeObj = vegComes.getJSONObject(i);
-                HSSFRow vegComeRow = sheet.getRow(vegComeRowNumber);
-                vegComeRow.getCell(VariableUtils.SheetColumnIndexs.NAME.getIndex())
-                        .setCellValue(vegComeObj.getString("name"));
-                vegComeRow.getCell(VariableUtils.SheetColumnIndexs.NET.getIndex())
-                        .setCellValue(vegComeObj.getString("weight"));
-                vegComeRow.getCell(VariableUtils.SheetColumnIndexs.UNITPRICE.getIndex())
-                        .setCellValue(vegComeObj.getString("price"));
-                vegComeRow.getCell(VariableUtils.SheetColumnIndexs.PRICE.getIndex())
-                        .setCellValue(vegComeObj.getString("sumPrice"));
-                vegComeRowNumber++;
+            if (vegComes != null) {
+                CellReference[] vegComeNames = VariableUtils.GetAreaReferenc(wb, "vege_name_come").getAllReferencedCells();
+                CellReference[] vegComeNets = VariableUtils.GetAreaReferenc(wb, "vege_net_come").getAllReferencedCells();
+                CellReference[] vegComeUnitPrices = VariableUtils.GetAreaReferenc(wb, "vege_unitprice_come").getAllReferencedCells();
+                CellReference[] vegComeSumPrices = VariableUtils.GetAreaReferenc(wb, "vege_sumprice_come").getAllReferencedCells();
+                for (int i = 0; i < vegComes.length(); i++) {
+                    JSONObject vegComeObj = vegComes.getJSONObject(i);
+
+                    Cell nameCell = sheet.getRow(vegComeNames[i].getRow()).getCell(vegComeNames[i].getCol());
+                    nameCell.setCellValue(vegComeObj.getString("name"));
+                    Cell weightCell = sheet.getRow(vegComeNets[i].getRow()).getCell(vegComeNets[i].getCol());
+                    weightCell.setCellValue(vegComeObj.getString("weight"));
+                    Cell priceCell = sheet.getRow(vegComeUnitPrices[i].getRow()).getCell(vegComeUnitPrices[i].getCol());
+                    priceCell.setCellValue(vegComeObj.getString("price"));
+                    Cell sumPriceCell = sheet.getRow(vegComeSumPrices[i].getRow()).getCell(vegComeSumPrices[i].getCol());
+                    sumPriceCell.setCellValue(vegComeObj.getString("sumPrice"));
+                }
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -333,25 +350,24 @@ public class CustomerListFragment extends ListFragment {
 
         //菜列表
         ArrayList<TradeRecord> tradeRecords = new TradeRecordService().findTradeRecords(customer.getId());
-        int tradeRecordRowNum = 3;
-        for (TradeRecord tradeRecord: tradeRecords) {
-            HSSFRow tradeRow = sheet.getRow(tradeRecordRowNum);
-            tradeRow.getCell(VariableUtils.SheetColumnIndexs.NAME.getIndex())
-                    .setCellValue(tradeRecord.getVegetableName());
-            tradeRow.getCell(VariableUtils.SheetColumnIndexs.GROSS.getIndex())
-                    .setCellValue(tradeRecord.getGrossWeight());
-            tradeRow.getCell(VariableUtils.SheetColumnIndexs.FRAMECOUNT.getIndex())
-                    .setCellValue(tradeRecord.getWhiteFrameCount()+tradeRecord.getGreenFrameCount());
-            tradeRow.getCell(VariableUtils.SheetColumnIndexs.FRAMEWEIGHT.getIndex())
-                    .setCellValue(tradeRecord.getFrameWeight());
-            tradeRow.getCell(VariableUtils.SheetColumnIndexs.NET.getIndex())
-                    .setCellValue(tradeRecord.getNetWeight());
-            tradeRow.getCell(VariableUtils.SheetColumnIndexs.UNITPRICE.getIndex())
-                    .setCellValue(tradeRecord.getUnitPrice());
-            tradeRow.getCell(VariableUtils.SheetColumnIndexs.PRICE.getIndex())
-                    .setCellValue(tradeRecord.getSumPrice());
+        if (tradeRecords.size() > 0) {
+            CellReference[] vegNames = VariableUtils.GetAreaReferenc(wb, "vegetable_name").getAllReferencedCells();
+            CellReference[] grossWeights = VariableUtils.GetAreaReferenc(wb, "gross_weight").getAllReferencedCells();
+            CellReference[] frameCounts = VariableUtils.GetAreaReferenc(wb, "frame_count").getAllReferencedCells();
+            CellReference[] frameWeights = VariableUtils.GetAreaReferenc(wb, "frame_weight").getAllReferencedCells();
+            CellReference[] netWeights = VariableUtils.GetAreaReferenc(wb, "net_weight").getAllReferencedCells();
+            CellReference[] unitPrices = VariableUtils.GetAreaReferenc(wb, "unit_price").getAllReferencedCells();
+            CellReference[] sumPrices = VariableUtils.GetAreaReferenc(wb, "sum_price").getAllReferencedCells();
 
-            tradeRecordRowNum++;
+            for (int i = 0; i < tradeRecords.size(); i++) {
+                sheet.getRow(vegNames[i].getRow()).getCell(vegNames[i].getCol()).setCellValue(tradeRecords.get(i).getVegetableName());
+                sheet.getRow(grossWeights[i].getRow()).getCell(grossWeights[i].getCol()).setCellValue(tradeRecords.get(i).getGrossWeight());
+                sheet.getRow(frameCounts[i].getRow()).getCell(frameCounts[i].getCol()).setCellValue(tradeRecords.get(i).getWhiteFrameCount()+tradeRecords.get(i).getGreenFrameCount());
+                sheet.getRow(frameWeights[i].getRow()).getCell(frameWeights[i].getCol()).setCellValue(tradeRecords.get(i).getFrameWeight());
+                sheet.getRow(netWeights[i].getRow()).getCell(netWeights[i].getCol()).setCellValue(tradeRecords.get(i).getNetWeight());
+                sheet.getRow(unitPrices[i].getRow()).getCell(unitPrices[i].getCol()).setCellValue(tradeRecords.get(i).getUnitPrice());
+                sheet.getRow(sumPrices[i].getRow()).getCell(sumPrices[i].getCol()).setCellValue(tradeRecords.get(i).getSumPrice());
+            }
         }
     }
 
@@ -372,7 +388,7 @@ public class CustomerListFragment extends ListFragment {
 
             Customer c = getItem(position);
 
-            TextView titleTextView = (TextView)convertView.findViewById(R.id.crime_list_item_titleTextView);
+            TextView titleTextView = (TextView)convertView.findViewById(R.id.customer_list_item_titleTextView);
             titleTextView.setText(c.getName());
 
             return convertView;

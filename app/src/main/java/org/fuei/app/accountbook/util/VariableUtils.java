@@ -3,8 +3,14 @@ package org.fuei.app.accountbook.util;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Environment;
-import android.util.Log;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Name;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.AreaReference;
+import org.apache.poi.ss.util.CellReference;
 import org.fuei.app.accountbook.R;
 
 import java.io.File;
@@ -14,9 +20,7 @@ import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 
 /**
  * Created by fuei on 2016/7/15.
@@ -32,9 +36,18 @@ public class VariableUtils {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         return sdf.parse(DATADATE+"");
     }
+    public static String GetDateStr() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
+        try {
+            return sdf.format(GetDATE());
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
 
     //全局app类型，默认外市场
-    public static int APPTYPE = APP_TYPE.OUT.getAppType();
+    public static int APPTYPE = ENUM_APP_TYPE.OUT.getAppType();
 
     //数据库全路径
     public static String DBFILE = "";
@@ -42,17 +55,25 @@ public class VariableUtils {
     //当前客户id
     public static int CUSTOMERID = 0;
 
-    public enum APP_TYPE {
+    public enum ENUM_APP_TYPE {
         OUT(1), IN(2), FAMER(3);
 
         int app_type;
-        APP_TYPE(int app_type) {
+        ENUM_APP_TYPE(int app_type) {
             this.app_type = app_type;
         }
 
         public int getAppType() {
             return app_type;
         }
+    }
+    public static String GETCUSTOMERTYPE(int t) {
+        switch (t) {
+            case 1: return "外市场";
+            case 2: return "本市场";
+            case 3: return "菜农";
+        }
+        return "None";
     }
 
     /**
@@ -82,10 +103,23 @@ public class VariableUtils {
      * @param value
      * @return
      */
-    public static String SaveOneNum(float value) {
-        DecimalFormat decimalFormat=new DecimalFormat(".0");
+    public static float SaveOneNum(float value) {
+        DecimalFormat decimalFormat = null;
+        if (0 == (value - (int)value)) {
+            decimalFormat = new DecimalFormat("0");
+        } else {
+            decimalFormat = new DecimalFormat(".0");
+        }
+         String numStr = decimalFormat.format(value);
+        return Float.parseFloat(numStr);
+    }
 
-        return decimalFormat.format(value);
+    public static String FloatToStr(float value) {
+        if (0 == (value - (int)value)) {
+            DecimalFormat decimalFormat = new DecimalFormat("0");
+            return decimalFormat.format(value);
+        }
+        return value + "";
     }
 
     /**
@@ -109,12 +143,12 @@ public class VariableUtils {
      * @param customerName
      * @return 要保存的文件
      */
-    public static File ExportExcel2SDCard(Context context, String appType, String dataDateStr, String customerName) {
+    public static File ExportExcel2SDCard(Context context, int appType, String dataDateStr, String customerName) {
         //判断sd卡是否存在
         boolean sdCardExist = Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
 
         if (sdCardExist) {
-            String parentPath = appType + "/" + dataDateStr + "/";
+            String parentPath = "/" + VariableUtils.GETCUSTOMERTYPE(appType) + "/" + dataDateStr + "/";
             String excelFileName = customerName + ".xls";
             File docPath = new File(context.getExternalFilesDir(null).getAbsolutePath() + parentPath);
             if (docPath != null && !docPath.exists()) {
@@ -125,30 +159,6 @@ public class VariableUtils {
         }
 
         return null;
-    }
-
-    public enum SheetColumnIndexs {
-        NAME(0),GROSS(1),FRAMECOUNT(2),FRAMEWEIGHT(3),NET(4),UNITPRICE(5),PRICE(6);
-
-        int index;
-        SheetColumnIndexs(int i) {
-            this.index = i;
-        }
-        public int getIndex() {
-            return index;
-        }
-    }
-
-    public enum SheetRowIndexs {
-        WHITEGO(20),GREENGO(21),WHITECOME(22),GREENCOME(23),SUMGO(24),OWE(25),ALLMONEY(26);
-
-        int index;
-        SheetRowIndexs(int i) {
-            this.index = i;
-        }
-        public int getIndex() {
-            return index;
-        }
     }
 
     /**
@@ -194,6 +204,34 @@ public class VariableUtils {
                 e.printStackTrace();
             }
         }
+    }
+
+    /**
+     * 单个excel单元格赋值
+     * @param wb
+     * @param sheet
+     * @param cellName
+     * @param cellValue
+     */
+    public static void SetSingleCellValue(Workbook wb, Sheet sheet, String cellName, String cellValue) {
+        CellReference cref = GetAreaReferenc(wb, cellName).getFirstCell();
+        Row r = sheet.getRow(cref.getRow());
+        Cell c = r.getCell(cref.getCol());
+
+        c.setCellValue(cellValue);
+    }
+
+    /**
+     * 获取某名称单元格的域索引
+     * @param wb
+     * @param cellName
+     * @return
+     */
+    public static AreaReference GetAreaReferenc(Workbook wb, String cellName) {
+        int namedCellIdx = wb.getNameIndex(cellName);
+        Name aNamedCell = wb.getNameAt(namedCellIdx);
+
+        return new AreaReference(aNamedCell.getRefersToFormula(), null);
     }
 
 

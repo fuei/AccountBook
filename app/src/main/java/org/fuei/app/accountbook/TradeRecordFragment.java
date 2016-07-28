@@ -16,6 +16,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import org.fuei.app.accountbook.po.TradeRecord;
+import org.fuei.app.accountbook.service.CustomerRemarkService;
 import org.fuei.app.accountbook.service.TradeRecordService;
 import org.fuei.app.accountbook.util.VariableUtils;
 
@@ -87,13 +88,13 @@ public class TradeRecordFragment extends Fragment {
         mSumPriceTxt = (TextView)v.findViewById(R.id.textView_sumPrice);
 
         if (mTradeRecord.getGrossWeight() != 0) {
-            mUnitPriceTxt.setText(mTradeRecord.getUnitPrice()+"");
-            mGrossWeightTxt.setText(mTradeRecord.getGrossWeight()+"");
-            mWFrameCountTxt.setText(mTradeRecord.getWhiteFrameCount()+"");
-            mGFrameCountTxt.setText(mTradeRecord.getGreenFrameCount()+"");
+            mUnitPriceTxt.setHint(mTradeRecord.getUnitPrice()+"");
+            mGrossWeightTxt.setHint(mTradeRecord.getGrossWeight()+"");
+            mWFrameCountTxt.setHint(mTradeRecord.getWhiteFrameCount()+"");
+            mGFrameCountTxt.setHint(mTradeRecord.getGreenFrameCount()+"");
             mFrameWeightTxt.setText(mTradeRecord.getFrameWeight()+"");
             mNetWeightTxt.setText(mTradeRecord.getNetWeight()+"");
-            mSumPriceTxt.setText(VariableUtils.SaveOneNum(mTradeRecord.getSumPrice()));
+            mSumPriceTxt.setText(mTradeRecord.getSumPrice()+"");
         }
 
         return v;
@@ -123,8 +124,11 @@ public class TradeRecordFragment extends Fragment {
                 //毛重
                 String grossWeightStr = mGrossWeightTxt.getText().toString();
                 if(grossWeightStr==null || grossWeightStr.trim().equals("")) {
-                    mGrossWeightTxt.setError("请输入毛重！");
-                    return false;
+                    grossWeightStr = mGrossWeightTxt.getHint().toString();
+                    if (grossWeightStr == null || grossWeightStr.trim().equals("")) {
+                        mGrossWeightTxt.setError("请输入毛重！");
+                        return false;
+                    }
                 }
                 float grossWeight = Float.parseFloat(grossWeightStr);
                 mTradeRecord.setGrossWeight(grossWeight);
@@ -133,7 +137,11 @@ public class TradeRecordFragment extends Fragment {
                 String wFrameCountStr = mWFrameCountTxt.getText().toString();
                 int wFrameCount = 0;
                 if(wFrameCountStr==null || wFrameCountStr.trim().equals("")) {
-                    wFrameCount = 0;
+                    wFrameCountStr = mWFrameCountTxt.getHint().toString();
+                    if (wFrameCountStr==null || wFrameCountStr.trim().equals(""))
+                        wFrameCount = 0;
+                    else
+                        wFrameCount = Integer.parseInt(wFrameCountStr);
                 } else {
                     wFrameCount = Integer.parseInt(wFrameCountStr);
                 }
@@ -143,7 +151,11 @@ public class TradeRecordFragment extends Fragment {
                 String gFrameCountStr = mGFrameCountTxt.getText().toString();
                 int gFrameCount = 0;
                 if(gFrameCountStr==null || gFrameCountStr.trim().equals("")) {
-                    gFrameCount = 0;
+                    gFrameCountStr = mGFrameCountTxt.getHint().toString();
+                    if(gFrameCountStr==null || gFrameCountStr.trim().equals(""))
+                        gFrameCount = 0;
+                    else
+                        gFrameCount = Integer.parseInt(gFrameCountStr);
                 } else {
                     gFrameCount = Integer.parseInt(gFrameCountStr);
                 }
@@ -159,7 +171,7 @@ public class TradeRecordFragment extends Fragment {
                 mTradeRecord.setNetWeight(netWeight);
                 //总价
                 float sumPrice = netWeight * unitPrice;
-                String sumPriceAdjust = VariableUtils.SaveOneNum(sumPrice);
+                String sumPriceAdjust = sumPrice + "";
                 mSumPriceTxt.setText(sumPriceAdjust);
                 mTradeRecord.setSumPrice(sumPrice);
 

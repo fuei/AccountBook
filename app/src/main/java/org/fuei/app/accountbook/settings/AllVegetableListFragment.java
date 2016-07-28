@@ -23,6 +23,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.fuei.app.accountbook.R;
 import org.fuei.app.accountbook.po.Customer;
@@ -190,6 +191,13 @@ public class AllVegetableListFragment extends ListFragment {
                                 Vegetable v = new Vegetable();
                                 v.setName(name);
                                 v.setUnitPrice(Float.parseFloat(price));
+                                for (Vegetable tempV: mVeges) {
+                                    if (name.equals(tempV.getName())) {
+                                        Toast.makeText(getActivity(), "该商品已存在！", Toast.LENGTH_LONG).show();
+                                        return;
+                                    }
+                                }
+
                                 VegetableLab.get(getActivity()).addVegetable(v);
                                 VegeAdapter adapter = (VegeAdapter)getListAdapter();
                                 adapter.add(v);

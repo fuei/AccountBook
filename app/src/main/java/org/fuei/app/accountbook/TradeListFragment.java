@@ -23,6 +23,7 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -69,6 +70,9 @@ public class TradeListFragment extends ListFragment {
         VariableUtils.CUSTOMERID = customId;
         Log.d(TAG, "customId: " + customId);
 
+        //新建客户进货备注记录
+        new CustomerRemarkService().insertRecord(customId);
+
         mTradeRecords = new TradeRecordService(getActivity(), customId).findTradeRecords(customId);
         Log.d("ReacordCount: ", mTradeRecords.size()+"");
 
@@ -86,9 +90,13 @@ public class TradeListFragment extends ListFragment {
         setListAdapter(adapter);
         ((TradeRecordAdapter)getListAdapter()).notifyDataSetChanged();
 
-        //汇总客户的筐数
-        new CustomerRemarkService().insertOrUpdateFrameCount(VariableUtils.CUSTOMERID);
+    }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        //汇总
+        new CustomerRemarkService().defaultUpdateRecord(VariableUtils.CUSTOMERID);
     }
 
     @Override
@@ -210,7 +218,7 @@ public class TradeListFragment extends ListFragment {
             case R.id.action_add:
                 // 弹出选择客户的对话框
                 FragmentManager fm = getActivity().getSupportFragmentManager();
-                TypePickerFragment dialog = TypePickerFragment.newInstance(VariableUtils.DIALOG_TYPE.VEGETABLE.getDialogType(),VariableUtils.APP_TYPE.OUT.getAppType());
+                TypePickerFragment dialog = TypePickerFragment.newInstance(VariableUtils.DIALOG_TYPE.VEGETABLE.getDialogType(), VariableUtils.ENUM_APP_TYPE.OUT.getAppType());
 
 //            dialog.setTargetFragment(TradeListFragment.class, REQUEST_CUSTOMER);
                 dialog.show(fm, DIALOG_VEGETABLE);
@@ -271,7 +279,10 @@ public class TradeListFragment extends ListFragment {
 
             TradeRecord t = getItem(position);
 
-            TextView titleTextView = (TextView)convertView.findViewById(R.id.crime_list_item_titleTextView);
+            ImageView imageView = (ImageView)convertView.findViewById(R.id.imageView3);
+            imageView.setImageResource(android.R.drawable.presence_away);
+
+            TextView titleTextView = (TextView)convertView.findViewById(R.id.customer_list_item_titleTextView);
             titleTextView.setText(t.getVegetableName());
 //            TextView dateTextView = (TextView)convertView.findViewById(R.id.crime_list_item_dateTextView);
 //            dateTextView.setText(c.getAddress().toString());

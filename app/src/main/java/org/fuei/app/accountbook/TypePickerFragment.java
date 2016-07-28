@@ -66,9 +66,10 @@ public class TypePickerFragment extends DialogFragment {
         if (mDialogType == VariableUtils.DIALOG_TYPE.CUSTOMER.getDialogType()) {
             ArrayList<Customer> customers = CustomerService.get(getActivity()).getCustomers();
             for (Customer c: customers) {
-                RadioButton tempButton = new RadioButton(getActivity());
+                RadioButton tempButton = (RadioButton) getActivity().getLayoutInflater().inflate(R.layout.myradiobutton, null);
                 tempButton.setText(c.getName());
                 tempButton.setId(c.getId());
+
                 if (firstFlag == 0) {
                     tempButton.setChecked(true);
                     mObjectId = tempButton.getId();
@@ -79,7 +80,7 @@ public class TypePickerFragment extends DialogFragment {
         } else if (mDialogType == VariableUtils.DIALOG_TYPE.VEGETABLE.getDialogType()) {
             ArrayList<Vegetable> vegetables = VegetableService.get(getActivity()).getVegetables();
             for (Vegetable v: vegetables) {
-                RadioButton tempButton = new RadioButton(getActivity());
+                RadioButton tempButton = (RadioButton) getActivity().getLayoutInflater().inflate(R.layout.myradiobutton, null);
                 tempButton.setText(v.getName());
                 tempButton.setId(v.getId());
                 if (firstFlag == 0) {
@@ -109,7 +110,11 @@ public class TypePickerFragment extends DialogFragment {
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                sendResult(Activity.RESULT_OK);
+                                if (mObjectId == 0) {
+                                    dialog.cancel();
+                                } else {
+                                    sendResult(Activity.RESULT_OK);
+                                }
                             }
                         }
                 )

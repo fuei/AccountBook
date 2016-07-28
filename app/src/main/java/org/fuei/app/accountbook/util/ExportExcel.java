@@ -73,26 +73,4 @@ public class ExportExcel {
 
     }
 
-    /**
-     *
-     * @param path 文件夹路径
-     */
-    private static void getOutExcelPath(String path) {
-        File file = new File(path);
-        //判断文件夹是否存在,如果不存在则创建文件夹
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private static void getOutExcelDir(String dir) {
-        File file = new File(dir);
-        if (!file.exists() && !file.isDirectory()) {
-            file.mkdir();
-        }
-    }
 }

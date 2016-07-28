@@ -216,7 +216,7 @@ public class TradeRecordService {
         Cursor cursor = sqLiteDatabase.rawQuery("SELECT sum(sum_price) FROM t_trade_record where customer_id = "+ customerId +" AND data_date = " + dataDate, null);
         float sumPrice = 0;
         if(cursor.moveToFirst())
-            sumPrice = cursor.getInt(0);
+            sumPrice = cursor.getFloat(0);
 
         sqLiteDatabase.close();
 
