@@ -93,6 +93,11 @@ public class CustomerRemarkFragment extends Fragment {
         }
 
         mWFrameGoTxt = (TextView)view.findViewById(R.id.textView_wFraCount_go);
+        //region 设置焦点
+        mWFrameGoTxt.setFocusable(true);
+        mWFrameGoTxt.requestFocus();
+        mWFrameGoTxt.setFocusableInTouchMode(true);
+        //endregion
         mWFrameGoTxt.setText(mCustomerRemark.getWhiteGo()+"");
         mGFrameGoTxt = (TextView)view.findViewById(R.id.textView_gFraCount_go);
         mGFrameGoTxt.setText(mCustomerRemark.getGreenGo()+"");

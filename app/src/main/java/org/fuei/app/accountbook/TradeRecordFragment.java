@@ -81,6 +81,11 @@ public class TradeRecordFragment extends Fragment {
         mUnitPriceTxt = (EditText)v.findViewById(R.id.editText_unitPrice);
         mUnitPriceTxt.setHint(mTradeRecord.getUnitPrice()+"");
         mGrossWeightTxt = (EditText)v.findViewById(R.id.editText_grossWeight);
+        //region 设置焦点
+        mGrossWeightTxt.setFocusable(true);
+        mGrossWeightTxt.requestFocus();
+        mGrossWeightTxt.setFocusableInTouchMode(true);
+        //endregion
         mWFrameCountTxt = (EditText)v.findViewById(R.id.editText_wFrameCount);
         mGFrameCountTxt = (EditText)v.findViewById(R.id.editText_gFrameCount);
         mFrameWeightTxt = (TextView)v.findViewById(R.id.textView_frameWeight);

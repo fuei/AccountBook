@@ -62,7 +62,7 @@ public class AllVegetableListFragment extends ListFragment {
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
 
-        ActionBar actionBar = (ActionBar)((AppCompatActivity)getActivity()).getSupportActionBar();
+        final ActionBar actionBar = (ActionBar)((AppCompatActivity)getActivity()).getSupportActionBar();
         assert v != null;
         ListView listView = (ListView)v.findViewById(android.R.id.list);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
@@ -80,6 +80,9 @@ public class AllVegetableListFragment extends ListFragment {
 
                 @Override
                 public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                    if (actionBar != null) {
+                        actionBar.hide();
+                    }
                     MenuInflater menuInflater = mode.getMenuInflater();
                     menuInflater.inflate(R.menu.list_item_context, menu);
                     return true;
@@ -112,7 +115,9 @@ public class AllVegetableListFragment extends ListFragment {
 
                 @Override
                 public void onDestroyActionMode(ActionMode mode) {
-
+                    if (actionBar != null) {
+                        actionBar.show();
+                    }
                 }
             });
         }
