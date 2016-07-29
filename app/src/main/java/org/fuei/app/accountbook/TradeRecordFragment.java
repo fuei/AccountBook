@@ -176,9 +176,16 @@ public class TradeRecordFragment extends Fragment {
                 mTradeRecord.setNetWeight(netWeight);
                 //总价
                 float sumPrice = netWeight * unitPrice;
-                String sumPriceAdjust = sumPrice + "";
-                mSumPriceTxt.setText(sumPriceAdjust);
-                mTradeRecord.setSumPrice(sumPrice);
+
+                if (VariableUtils.APPTYPE == VariableUtils.ENUM_APP_TYPE.FAMER.getAppType()) {
+                    String sumPriceAdjust = (int)sumPrice + "";
+                    mSumPriceTxt.setText(sumPriceAdjust);
+                    mTradeRecord.setSumPrice((int)sumPrice);
+                } else {
+                    String sumPriceAdjust = sumPrice + "";
+                    mSumPriceTxt.setText(sumPriceAdjust);
+                    mTradeRecord.setSumPrice(sumPrice);
+                }
 
                 new TradeRecordService().updateRecord(mTradeRecord);
 

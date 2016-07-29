@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import org.fuei.app.accountbook.po.Customer;
 import org.fuei.app.accountbook.po.Vegetable;
 import org.fuei.app.accountbook.util.VariableUtils;
 
@@ -18,10 +17,8 @@ public class VegetableLab {
     private ArrayList<Vegetable> mVeges;
 
     private static VegetableLab sVegeLab;
-    private Context mAppContext;
 
-    private VegetableLab(Context appContext) {
-        mAppContext = appContext;
+    private VegetableLab() {
         mVeges = new ArrayList<Vegetable>();
 
         //select
@@ -40,9 +37,9 @@ public class VegetableLab {
         sqLiteDatabase.close();
     }
 
-    public static VegetableLab get(Context c) {
+    public static VegetableLab get() {
 //        if (sVegeLab == null) {
-        sVegeLab = new VegetableLab(c.getApplicationContext());
+        sVegeLab = new VegetableLab();
 //        }
         return sVegeLab;
     }
@@ -60,14 +57,22 @@ public class VegetableLab {
         return null;
     }
 
-    public void addVegetable(Vegetable c) {
+    public int addVegetable(Vegetable c) {
         SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openOrCreateDatabase(VariableUtils.DBFILE, null);
 
         String insertSql = "insert into t_vegetable(name, unit_price) values(?,?)";
         sqLiteDatabase.execSQL(insertSql, new Object[]{c.getName(), c.getUnitPrice()});
+
+        Cursor cursor = sqLiteDatabase.rawQuery("select last_insert_rowid() from t_vegetable", null);
+        int strid = 0;
+        if(cursor.moveToFirst())
+            strid = cursor.getInt(0);
+
         sqLiteDatabase.close();
 
         mVeges.add(c);
+
+        return strid;
     }
 
     public void deleteVegetable(Vegetable c) {

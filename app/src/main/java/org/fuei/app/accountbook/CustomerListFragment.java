@@ -150,8 +150,8 @@ public class CustomerListFragment extends ListFragment {
     @Override
     public void onResume() {
         super.onResume();
-        mCustomers = new TradeRecordService(getActivity(), 0).findTradeCustomers(VariableUtils.APPTYPE);
 
+        mCustomers = new TradeRecordService(getActivity(), 0).findTradeCustomers(VariableUtils.APPTYPE);
         CustomerAdapter adapter = new CustomerAdapter(mCustomers);
         setListAdapter(adapter);
         ((CustomerAdapter)getListAdapter()).notifyDataSetChanged();
@@ -390,7 +390,7 @@ public class CustomerListFragment extends ListFragment {
 
             TextView titleTextView = (TextView)convertView.findViewById(R.id.customer_list_item_titleTextView);
             titleTextView.setText(c.getName());
-
+            
             return convertView;
 
         }

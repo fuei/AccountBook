@@ -8,7 +8,6 @@ import android.support.v4.app.ListFragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -26,9 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.fuei.app.accountbook.R;
-import org.fuei.app.accountbook.po.Customer;
 import org.fuei.app.accountbook.po.Vegetable;
-import org.fuei.app.accountbook.util.VariableUtils;
 
 import java.util.ArrayList;
 
@@ -46,7 +43,7 @@ public class AllVegetableListFragment extends ListFragment {
         setHasOptionsMenu(true);
 
         getActivity().setTitle("商品管理");
-        mVeges = VegetableLab.get(getActivity()).getVeges();
+        mVeges = VegetableLab.get().getVeges();
 
         VegeAdapter adapter = new VegeAdapter(mVeges);
         setListAdapter(adapter);
@@ -98,7 +95,7 @@ public class AllVegetableListFragment extends ListFragment {
                     switch (item.getItemId()) {
                         case R.id.menu_item_delete:
                             VegeAdapter adapter = (VegeAdapter)getListAdapter();
-                            VegetableLab vegetableLab = VegetableLab.get(getActivity());
+                            VegetableLab vegetableLab = VegetableLab.get();
                             for (int i = adapter.getCount() - 1; i >= 0; i--) {
                                 if (getListView().isItemChecked(i)) {
                                     vegetableLab.deleteVegetable(adapter.getItem(i));
@@ -145,7 +142,7 @@ public class AllVegetableListFragment extends ListFragment {
                             return;
                         }
                         vegetable.setUnitPrice(Float.parseFloat(price));
-                        VegetableLab.get(getActivity()).updateVegetable(vegetable);
+                        VegetableLab.get().updateVegetable(vegetable);
                         VegeAdapter adapter = (VegeAdapter)getListAdapter();
                         adapter.notifyDataSetChanged();
                     }
@@ -203,7 +200,7 @@ public class AllVegetableListFragment extends ListFragment {
                                     }
                                 }
 
-                                VegetableLab.get(getActivity()).addVegetable(v);
+                                VegetableLab.get().addVegetable(v);
                                 VegeAdapter adapter = (VegeAdapter)getListAdapter();
                                 adapter.add(v);
                                 adapter.notifyDataSetChanged();
@@ -238,7 +235,7 @@ public class AllVegetableListFragment extends ListFragment {
 
         switch (item.getItemId()) {
             case R.id.menu_item_delete:
-                VegetableLab.get(getActivity()).deleteVegetable(c);
+                VegetableLab.get().deleteVegetable(c);
                 adapter.notifyDataSetChanged();
                 return true;
         }

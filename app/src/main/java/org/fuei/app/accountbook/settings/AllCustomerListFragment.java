@@ -1,16 +1,13 @@
 package org.fuei.app.accountbook.settings;
 
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ListFragment;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -48,7 +45,7 @@ public class AllCustomerListFragment extends ListFragment {
         setHasOptionsMenu(true);
 
         getActivity().setTitle("客户管理");
-        mCustomers = CustomerLab.get(getActivity()).getCustomers();
+        mCustomers = CustomerLab.get().getCustomers();
 
         CustomerAdapter adapter = new CustomerAdapter(mCustomers);
         setListAdapter(adapter);
@@ -100,7 +97,7 @@ public class AllCustomerListFragment extends ListFragment {
                     switch (item.getItemId()) {
                         case R.id.menu_item_delete:
                             CustomerAdapter adapter = (CustomerAdapter)getListAdapter();
-                            CustomerLab customerLab = CustomerLab.get(getActivity());
+                            CustomerLab customerLab = CustomerLab.get();
                             for (int i = adapter.getCount() - 1; i >= 0; i--) {
                                 if (getListView().isItemChecked(i)) {
                                     customerLab.deleteCustomer(adapter.getItem(i));
@@ -158,7 +155,7 @@ public class AllCustomerListFragment extends ListFragment {
                                     }
                                 }
 
-                                CustomerLab.get(getActivity()).addCustomer(c);
+                                CustomerLab.get().addCustomer(c);
                                 CustomerAdapter adapter = (CustomerAdapter)getListAdapter();
                                 adapter.add(c);
                                 adapter.notifyDataSetChanged();
@@ -193,7 +190,7 @@ public class AllCustomerListFragment extends ListFragment {
 
         switch (item.getItemId()) {
             case R.id.menu_item_delete:
-                CustomerLab.get(getActivity()).deleteCustomer(c);
+                CustomerLab.get().deleteCustomer(c);
                 adapter.notifyDataSetChanged();
                 return true;
         }

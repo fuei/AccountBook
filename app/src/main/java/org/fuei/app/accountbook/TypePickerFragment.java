@@ -2,6 +2,7 @@ package org.fuei.app.accountbook;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,14 +10,18 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
 import org.fuei.app.accountbook.po.Customer;
 import org.fuei.app.accountbook.po.Vegetable;
 import org.fuei.app.accountbook.service.CustomerService;
 import org.fuei.app.accountbook.service.VegetableService;
+import org.fuei.app.accountbook.settings.CustomerLab;
+import org.fuei.app.accountbook.settings.VegetableLab;
 import org.fuei.app.accountbook.util.VariableUtils;
 
 import java.util.ArrayList;
@@ -32,6 +37,7 @@ public class TypePickerFragment extends DialogFragment {
     private int mDialogType;
     private int mListType;
     private int mObjectId;
+    private Activity mAct;
 
     private RadioGroup mRadioGroup;
 
@@ -55,6 +61,8 @@ public class TypePickerFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        mAct = getActivity();
+
         mDialogType = (int)getArguments().getSerializable(EXTRA_DIALOG_TYPE);
         mListType = (int)getArguments().getSerializable(EXTRA_LIST_TYPE);
 
@@ -104,7 +112,7 @@ public class TypePickerFragment extends DialogFragment {
 
         return new AlertDialog.Builder(getActivity())
                 .setView(view)
-                .setTitle(R.string.customer_picker)
+                .setTitle("请选择")
                 .setPositiveButton(
                         android.R.string.ok,
                         new DialogInterface.OnClickListener() {
@@ -113,7 +121,7 @@ public class TypePickerFragment extends DialogFragment {
                                 if (mObjectId == 0) {
                                     dialog.cancel();
                                 } else {
-                                    sendResult(Activity.RESULT_OK);
+                                    sendResult();
                                 }
                             }
                         }
@@ -127,22 +135,110 @@ public class TypePickerFragment extends DialogFragment {
                             }
                         }
                 )
+                .setNeutralButton(
+                        "添加新选项",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (mDialogType == VariableUtils.DIALOG_TYPE.CUSTOMER.getDialogType()) {
+                                    final View viewDialogAdd = getActivity().getLayoutInflater().inflate(R.layout.dialog_add_cutomer,null);
+                                    // 1. Instantiate an AlertDialog.Builder with its constructor
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                                    // 2. Chain together various setter methods to set the dialog characteristics
+                                    builder.setTitle("添加客户").setView(viewDialogAdd)
+                                            .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    EditText nameTxt = (EditText) viewDialogAdd.findViewById(R.id.editText_addCustomer);
+
+                                                    String cName = nameTxt.getText().toString();
+                                                    if (cName==null || cName.trim().equals("")) {
+                                                        nameTxt.setError("请输入客户名！");
+                                                        return;
+                                                    }
+                                                    Customer c = new Customer();
+                                                    c.setName(cName);
+                                                    c.setType(VariableUtils.APPTYPE);
+
+                                                    ArrayList<Customer> customers = CustomerLab.get().getCustomers();
+                                                    for (Customer tempC: customers) {
+                                                        if (cName.equals(tempC.getName()) && (VariableUtils.APPTYPE == tempC.getType())) {
+                                                            Toast.makeText(mAct, "该客户已存在！", Toast.LENGTH_LONG).show();
+                                                            return;
+                                                        }
+                                                    }
+
+                                                    mObjectId = CustomerLab.get().addCustomer(c);
+                                                    sendResult();
+                                                }
+                                            })
+                                            .setNegativeButton("取消", null);
+                                    // 3. Get the AlertDialog from create()
+                                    AlertDialog tempDialog = builder.create();
+                                    tempDialog.show();
+                                } else {
+                                    final View viewDialogAdd = getActivity().getLayoutInflater().inflate(R.layout.dialog_add_vegetable,null);
+                                    // 1. Instantiate an AlertDialog.Builder with its constructor
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                                    // 2. Chain together various setter methods to set the dialog characteristics
+                                    builder.setTitle("添加商品").setView(viewDialogAdd)
+                                            .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    EditText nameTxt = (EditText) viewDialogAdd.findViewById(R.id.editText_addVege);
+                                                    EditText priceTxt = (EditText) viewDialogAdd.findViewById(R.id.editText_addVegePrice);
+                                                    String name = nameTxt.getText().toString();
+                                                    if (name==null || name.trim().equals("")) {
+                                                        nameTxt.setError("请输入菜名！");
+                                                        return;
+                                                    }
+                                                    String price = priceTxt.getText().toString();
+                                                    if (price==null || price.trim().equals("")) {
+                                                        priceTxt.setError("请输入单价！");
+                                                        return;
+                                                    }
+                                                    Vegetable v = new Vegetable();
+                                                    v.setName(name);
+                                                    v.setUnitPrice(Float.parseFloat(price));
+
+                                                    ArrayList<Vegetable> veges = VegetableLab.get().getVeges();
+                                                    for (Vegetable tempV: veges) {
+                                                        if (name.equals(tempV.getName())) {
+                                                            Toast.makeText(mAct, "该商品已存在！", Toast.LENGTH_LONG).show();
+                                                            return;
+                                                        }
+                                                    }
+
+                                                    mObjectId = VegetableLab.get().addVegetable(v);
+                                                    sendResult();
+
+                                                }
+                                            })
+                                            .setNegativeButton("取消", null);
+                                    // 3. Get the AlertDialog from create()
+                                    AlertDialog tempDialog = builder.create();
+                                    tempDialog.show();
+                                }
+                            }
+                        }
+                )
                 .create();
     }
 
-    private void sendResult(int resultCode) {
+    private void sendResult() {
         Intent i = null;
         if (mDialogType == VariableUtils.DIALOG_TYPE.CUSTOMER.getDialogType()) {
             //启动该客户的交易列表Activity
-            i = new Intent(getActivity(), TradeListActivity.class);
+            i = new Intent(mAct, TradeListActivity.class);
             //传参
             i.putExtra(TradeListFragment.EXTRA_CUSTOMER_ID, mObjectId);
         } else if (mDialogType == VariableUtils.DIALOG_TYPE.VEGETABLE.getDialogType()) {
             //启动该客户的交易列表Activity
-            i = new Intent(getActivity(), TradeRecordActivity.class);
+            i = new Intent(mAct, TradeRecordActivity.class);
             //传参
             i.putExtra(TradeRecordFragment.EXTRA_TR_ID, mObjectId);
         }
-        startActivity(i);
+        mAct.startActivity(i);
+
     }
 }

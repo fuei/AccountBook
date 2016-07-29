@@ -1,5 +1,7 @@
 package org.fuei.app.accountbook;
 
+import android.app.ActivityManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -103,6 +105,8 @@ public class MainActivity extends AppCompatActivity
                 drawer.closeDrawer(GravityCompat.START);
             } else {
                 super.onBackPressed();
+                int nPid = android.os.Process.myPid();
+                android.os.Process.killProcess(nPid);
             }
         }
     }
